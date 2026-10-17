@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" fill="none">
+  <title>Log Pose navigation compass</title>
+  <g stroke="#243b45" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M48 12h32l5 28H43Zm-5 77h42l-5 28H48Z" fill="#94704a"/>
+    <path d="M49 18h30M48 25h32m-33 7h34M48 97h32m-31 8h30m-28 7h26" stroke="#d9aa50" stroke-width="1.2"/>
+    <ellipse cx="64" cy="85" rx="37" ry="13" fill="#bb8d49"/>
+    <path d="M28 72v13c0 16 72 16 72 0V72" fill="#d9aa50"/>
+    <ellipse cx="64" cy="73" rx="36" ry="12" fill="#f1d7a0"/>
+    <path d="M34 73V58a30 30 0 0 1 60 0v15c-16 11-44 11-60 0Z" fill="#d7e8df" fill-opacity=".68"/>
+    <path d="M41 59a23 23 0 0 1 18-23m-19 30v6" stroke="#fffaf0" stroke-width="4"/>
+    <ellipse cx="64" cy="74" rx="23" ry="6" stroke="#678c88" stroke-width="1.2"/>
+    <path d="m64 40-8 26 8-4 8 4Z" fill="#b44332"/>
+    <path d="m64 83-8-17 8-4 8 4Z" fill="#f5f0e5"/>
+    <circle cx="64" cy="63" r="3" fill="#d9aa50"/>
+    <path d="M24 74h-6v10h7m79-10h6v10h-7M37 88v4m14-2v5m13-5v6m13-6v5m14-7v4" stroke-width="2"/>
+  </g>
+</svg>

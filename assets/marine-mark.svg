@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" fill="none">
+  <title>Marine seagull insignia</title>
+  <desc>A dark nautical seagull emblem with spreading wings, an upright mast and a small anchor tail, finished with two muted red rules for a parchment research log.</desc>
+  <g stroke="#243b45" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M64 67V15m-8 8h16" stroke-width="5"/>
+    <path d="M64 17V9" stroke-width="3"/>
+    <path d="M64 56C52 24 24 25 8 39c22-5 36 3 43 17-15-13-34-11-45-3 24 0 39 12 47 26l11-8 11 8c8-14 23-26 47-26-11-8-30-10-45 3 7-14 21-22 43-17-16-14-44-15-56 17Z" fill="#243b45" stroke-width="2"/>
+    <path d="M55 73c-6 9-13 13-25 15l-8-8v20l13-7c10 1 22-3 29-10 7 7 19 11 29 10l13 7V80l-8 8c-12-2-19-6-25-15" fill="#243b45" stroke-width="2"/>
+    <path d="M64 72v27m-5-4 5 9 5-9" stroke-width="4"/>
+    <path d="M33 112h62M43 118h42" stroke="#b44332" stroke-width="2"/>
+    <path d="M29 39c12 1 23 8 29 20m41-20c-12 1-23 8-29 20" stroke="#f5f0e5" stroke-width="1.3"/>
+  </g>
+</svg>

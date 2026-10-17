@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" fill="none">
+  <title>Straw Hat Pirates Jolly Roger</title>
+  <g stroke="#243b45" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+    <path d="m24 91 79-55m-80 0 81 55" stroke="#f5f0e5" stroke-width="10"/>
+    <path d="m24 91 79-55m-80 0 81 55" stroke-width="13"/>
+    <path d="m24 91 79-55m-80 0 81 55" stroke="#f5f0e5" stroke-width="7"/>
+    <path d="M18 86c-7-2-9 6-4 9-2 6 6 9 9 4l5-4m71-56 5-2c4 4 11-1 8-6 5-4-1-11-6-7l-5 6M21 40l-5-2c-5 3-10-3-6-7-4-6 5-11 8-5l6 5m78 54 7 3c5-4 11 2 7 7 4 5-4 11-8 6l-6-5" fill="#f5f0e5"/>
+    <path d="M34 58c0-23 13-36 30-36s30 13 30 36c0 15-7 22-13 27v12c-9 11-25 11-34 0V85c-6-5-13-12-13-27Z" fill="#f5f0e5"/>
+    <ellipse cx="49" cy="63" rx="9" ry="11" fill="#243b45" stroke="none"/>
+    <ellipse cx="79" cy="63" rx="9" ry="11" fill="#243b45" stroke="none"/>
+    <path d="m64 75-5 8h10Z" fill="#243b45" stroke="none"/>
+    <path d="M45 89c12 7 26 7 38 0m-35 9h32M54 93v9m10-7v10m10-12v9" stroke-width="2"/>
+    <path d="M38 43c0-22 9-32 26-32s26 10 26 32" fill="#d9aa50"/>
+    <path d="M38 33c17 5 35 5 52 0l2 11c-20 7-36 7-56 0Z" fill="#b44332"/>
+    <path d="M20 44c9-8 79-8 88 0-4 13-84 13-88 0Z" fill="#d9aa50"/>
+    <path d="m44 20-2 8m13-11-1 12m10-13v14m9-13 1 12m9-9 2 8M28 45c20 6 52 6 72 0" stroke-width="1.3" opacity=".6"/>
+  </g>
+</svg>
