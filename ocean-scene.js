@@ -109,12 +109,27 @@
       }`, ["uVP", "uTime", "uEye", "uResolution"]);
     boat = program(`
       precision highp float;attribute vec3 aPosition;attribute vec3 aNormal;attribute vec3 aColor;attribute vec2 aUv;
-      uniform mat4 uVP;uniform mat4 uModel;uniform vec2 uClipShift;varying vec3 vNormal;varying vec3 vColor;varying vec2 vUv;
-      void main(){vec4 p=uVP*uModel*vec4(aPosition,1.);p.xy+=uClipShift*p.w;gl_Position=p;vNormal=normalize(mat3(uModel)*aNormal);vColor=aColor;vUv=aUv;}
+      uniform mat4 uVP;uniform mat4 uModel;uniform vec2 uClipShift;uniform float uTime;uniform float uCloth;
+      varying vec3 vNormal;varying vec3 vColor;varying vec2 vUv;varying vec3 vWorld;varying float vHeight;
+      void main(){
+        vec3 local=aPosition;
+        local.z+=uCloth*.055*sin(uTime*1.6+aUv.x*5.+aUv.y*2.)*sin(aUv.x*3.14159)*sin(aUv.y*3.14159);
+        vec4 world=uModel*vec4(local,1.);vec4 p=uVP*world;p.xy+=uClipShift*p.w;gl_Position=p;
+        vWorld=world.xyz;vHeight=local.y;vNormal=normalize(mat3(uModel)*aNormal);vColor=aColor;vUv=aUv;
+      }
       `, `
-      varying vec3 vNormal;varying vec3 vColor;varying vec2 vUv;uniform sampler2D uFlag;uniform float uTextured;
-      void main(){vec3 n=normalize(vNormal);float light=.62+.38*abs(dot(n,normalize(vec3(.3,.85,.6))));vec4 decal=texture2D(uFlag,vUv);vec3 color=mix(vColor,decal.rgb,decal.a*uTextured);gl_FragColor=vec4(color*light,1.);}
-      `, ["uVP", "uModel", "uClipShift", "uFlag", "uTextured"]);
+      varying vec3 vNormal;varying vec3 vColor;varying vec2 vUv;varying vec3 vWorld;varying float vHeight;
+      uniform sampler2D uFlag;uniform float uTextured;uniform float uCloth;uniform vec3 uEye;
+      void main(){
+        vec3 n=normalize(vNormal),lightDirection=normalize(vec3(-.45,.82,.65));
+        float light=.50+.43*max(dot(n,lightDirection),0.)+.10*max(dot(n,normalize(vec3(.7,.3,-.5))),0.);
+        light*=.87+.13*smoothstep(-.1,1.6,vHeight);
+        vec4 decal=texture2D(uFlag,vUv);vec3 color=mix(vColor,decal.rgb,decal.a*uTextured);
+        vec3 halfDirection=normalize(lightDirection+normalize(uEye-vWorld));
+        float sheen=pow(max(dot(n,halfDirection),0.),44.)*.065*(1.-uCloth);
+        gl_FragColor=vec4(color*light+vec3(1.,.89,.67)*sheen,1.);
+      }
+      `, ["uVP", "uModel", "uClipShift", "uFlag", "uTextured", "uTime", "uCloth", "uEye"]);
     skyBuffer = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, skyBuffer); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
     oceanMesh = makeOcean();
     const shapes = makeBoat(); hullMesh = upload(shapes.hull); sailMesh = upload(shapes.main); rearMesh = upload(shapes.rear);
@@ -142,98 +157,361 @@
 
   function makeBoat() {
     const hull = [], main = [], rear = [];
-    const wood = [.49, .25, .12], gold = [.89, .56, .18], cream = [.95, .88, .66], red = [.72, .23, .12], ink = [.12, .16, .17];
-    function triangle(out, a, b, c, color, uv = [[0, 0], [1, 0], [1, 1]]) {
+    const wood = [.52, .27, .13], darkWood = [.30, .14, .075], gold = [.94, .64, .22];
+    const cream = [.97, .90, .73], ivory = [1, .97, .85], red = [.77, .20, .14];
+    const ink = [.075, .15, .18], rope = [.63, .49, .30], glass = [.09, .34, .39];
+    const axes = [[1, 0, 0], [0, 1, 0], [0, 0, 1]], TAU = Math.PI * 2;
+    const shade = (color, amount) => color.map(n => Math.min(1, n * amount));
+    const along = (origin, basis, p) => origin.map((n, i) => n + basis[0][i] * p[0] + basis[1][i] * p[1] + basis[2][i] * p[2]);
+    function triangle(out, a, b, c, color, uv = [[0, 0], [1, 0], [1, 1]], normals) {
       const normal = normalize(cross(subtract(b, a), subtract(c, a)));
-      [a, b, c].forEach((p, i) => out.push(...p, ...normal, ...color, ...uv[i]));
+      [a, b, c].forEach((p, i) => out.push(...p, ...(normals ? normals[i] : normal), ...color, ...uv[i]));
     }
-    function quad(out, a, b, c, d, color, uv) {
-      triangle(out, a, b, c, color, uv && [uv[0], uv[1], uv[2]]);
-      triangle(out, a, c, d, color, uv && [uv[0], uv[2], uv[3]]);
+    function quad(out, a, b, c, d, color, uv, normals) {
+      triangle(out, a, b, c, color, uv && [uv[0], uv[1], uv[2]], normals && [normals[0], normals[1], normals[2]]);
+      triangle(out, a, c, d, color, uv && [uv[0], uv[2], uv[3]], normals && [normals[0], normals[2], normals[3]]);
     }
     function box(cx, cy, cz, sx, sy, sz, color) {
-      const v = [[-1, -1, -1], [1, -1, -1], [1, 1, -1], [-1, 1, -1], [-1, -1, 1], [1, -1, 1], [1, 1, 1], [-1, 1, 1]].map(p => [cx + p[0] * sx / 2, cy + p[1] * sy / 2, cz + p[2] * sz / 2]);
-      [[0, 3, 2, 1], [4, 5, 6, 7], [0, 4, 7, 3], [1, 2, 6, 5], [3, 7, 6, 2], [0, 1, 5, 4]].forEach(f => quad(hull, ...f.map(i => v[i]), color));
+      const v = [[-1,-1,-1],[1,-1,-1],[1,1,-1],[-1,1,-1],[-1,-1,1],[1,-1,1],[1,1,1],[-1,1,1]].map(p => [cx+p[0]*sx/2,cy+p[1]*sy/2,cz+p[2]*sz/2]);
+      [[0,3,2,1],[4,5,6,7],[0,4,7,3],[1,2,6,5],[3,7,6,2],[0,1,5,4]].forEach(f => quad(hull, ...f.map(i => v[i]), color));
     }
-    function rod(a, b, radius, color, sides = 7) {
+    function rod(a, b, radius, color, sides = 10, endRadius = radius, caps = true) {
       const direction = normalize(subtract(b, a));
-      const u = normalize(cross(direction, Math.abs(direction[1]) > .9 ? [1, 0, 0] : [0, 1, 0]));
-      const v = cross(direction, u);
-      const point = (center, angle) => center.map((n, i) => n + radius * (u[i] * Math.cos(angle) + v[i] * Math.sin(angle)));
-      for (let i = 0; i < sides; i += 1) {
-        const p = i / sides * Math.PI * 2, q = (i + 1) / sides * Math.PI * 2;
-        quad(hull, point(a, p), point(b, p), point(b, q), point(a, q), color);
-        triangle(hull, b, point(b, p), point(b, q), color);
+      const u = normalize(cross(direction, Math.abs(direction[1]) > .9 ? [1,0,0] : [0,1,0]));
+      const v = cross(direction, u), slope = (radius-endRadius) / (Math.hypot(...subtract(b,a)) || 1);
+      const radial = angle => u.map((n,i) => n*Math.cos(angle)+v[i]*Math.sin(angle));
+      const point = (center, r, angle) => center.map((n,i) => n+r*radial(angle)[i]);
+      const normal = angle => normalize(radial(angle).map((n,i) => n+direction[i]*slope));
+      for (let i=0;i<sides;i+=1) {
+        const p=i/sides*TAU,q=(i+1)/sides*TAU, n=normal(p),N=normal(q);
+        quad(hull,point(a,radius,p),point(b,endRadius,p),point(b,endRadius,q),point(a,radius,q),color,undefined,[n,n,N,N]);
+        if (caps) {
+          triangle(hull,b,point(b,endRadius,p),point(b,endRadius,q),color,undefined,[direction,direction,direction]);
+          const back=direction.map(n=>-n);
+          triangle(hull,a,point(a,radius,q),point(a,radius,p),color,undefined,[back,back,back]);
+        }
       }
     }
-    function sphere(center, size, color, slices = 10, bands = 6) {
-      function point(a, b) { return [center[0] + Math.cos(a) * Math.sin(b) * size[0], center[1] + Math.cos(b) * size[1], center[2] + Math.sin(a) * Math.sin(b) * size[2]]; }
-      for (let i = 0; i < slices; i += 1) for (let j = 0; j < bands; j += 1) {
-        const a = i / slices * Math.PI * 2, b = j / bands * Math.PI, c = (i + 1) / slices * Math.PI * 2, d = (j + 1) / bands * Math.PI;
-        quad(hull, point(a, b), point(c, b), point(c, d), point(a, d), color);
+    function path(points, radius, color, sides=6) {
+      for(let i=1;i<points.length;i+=1)rod(points[i-1],points[i],radius,color,sides,radius,false);
+    }
+    function sphere(center,size,color,slices=20,bands=12,basis=axes) {
+      const point=(a,b)=>along(center,basis,[Math.cos(a)*Math.sin(b)*size[0],Math.cos(b)*size[1],Math.sin(a)*Math.sin(b)*size[2]]);
+      const normal=(a,b)=>normalize(along([0,0,0],basis,[Math.cos(a)*Math.sin(b)/size[0],Math.cos(b)/size[1],Math.sin(a)*Math.sin(b)/size[2]]));
+      for(let i=0;i<slices;i+=1)for(let j=0;j<bands;j+=1){
+        const a=i/slices*TAU,b=j/bands*Math.PI,c=(i+1)/slices*TAU,d=(j+1)/bands*Math.PI;
+        quad(hull,point(a,b),point(c,b),point(c,d),point(a,d),color,undefined,[normal(a,b),normal(c,b),normal(c,d),normal(a,d)]);
       }
     }
-    // Three tapered hull rings, a real deck, and a raised quarterdeck.
-    const rings = [[.42, 1], [-.13, .94], [-.7, .53]];
-    const ringPoint = (i, ring) => { const a = i / 22 * Math.PI * 2; return [Math.cos(a) * 3.05 * ring[1], ring[0], Math.sin(a) * 1.12 * ring[1]]; };
-    for (let k = 0; k < 2; k += 1) for (let i = 0; i < 22; i += 1) {
-      quad(hull, ringPoint(i, rings[k]), ringPoint(i + 1, rings[k]), ringPoint(i + 1, rings[k + 1]), ringPoint(i, rings[k + 1]), i % 2 ? wood : [.58, .30, .13]);
-    }
-    for (let i = 0; i < 22; i += 1) {
-      triangle(hull, [0, .42, 0], ringPoint(i, rings[0]), ringPoint(i + 1, rings[0]), cream);
-      rod(ringPoint(i, [.56, 1]), ringPoint(i + 1, [.56, 1]), .055, gold, 5);
-    }
-    box(1.55, .79, -.05, 1.5, .72, 1.45, [.87, .81, .63]); box(1.55, 1.21, -.05, 1.8, .14, 1.65, red);
-    for (let i = 0; i < 3; i += 1) sphere([1.05 + i * .45, .88, .69], [.14, .16, .025], ink, 8, 4);
-    box(1.9, 1.58, -.1, .64, .62, .73, cream); box(1.9, 1.93, -.1, .82, .11, .89, gold);
-    rod([-.8, .42, 0], [-.8, 5.8, 0], .075, wood); rod([1.5, 1.25, 0], [1.5, 4.25, 0], .055, wood);
-    rod([-2.85, 4.95, .04], [1.2, 4.95, .04], .055, wood); rod([.1, 3.72, -.04], [2.9, 3.72, -.04], .045, wood);
-    rod([-.8, 5.5, 0], [-2.65, .58, .82], .016, [.40, .34, .23], 4);
-    rod([-.8, 5.5, 0], [2.3, .58, -.78], .016, [.40, .34, .23], 4);
-    rod([1.5, 4.2, 0], [2.7, .58, .66], .016, [.40, .34, .23], 4);
-    // Lion figurehead: golden mane, pale face, ears and small dark eyes.
-    sphere([-2.93, .94, .67], [.53, .54, .23], gold);
-    for (let i = 0; i < 10; i += 1) {
-      const a = i / 10 * Math.PI * 2;
-      sphere([-2.93 + Math.cos(a) * .51, .94 + Math.sin(a) * .51, .72], [.15, .14, .12], [.82, .39, .13], 5, 3);
-    }
-    sphere([-2.93, .94, .9], [.36, .36, .11], cream);
-    sphere([-3.07, 1.02, 1.01], [.037, .048, .025], ink, 6, 3); sphere([-2.79, 1.02, 1.01], [.037, .048, .025], ink, 6, 3);
-    sphere([-2.93, .86, 1.025], [.075, .055, .025], wood, 6, 3);
-    rod([-3.0, .55, 0], [-3.9, .85, 0], .035, wood);
-    function sail(out, center, bottom, top, halfWidth, striped) {
-      const columns = 12, rows = 10;
-      function point(u, v) { return [center + (u - .5) * halfWidth * 2 * (.83 + .17 * v), bottom + v * (top - bottom) - .13 * Math.sin(u * Math.PI), .15 + .5 * Math.sin(u * Math.PI) * Math.sin(v * Math.PI)]; }
-      for (let i = 0; i < columns; i += 1) for (let j = 0; j < rows; j += 1) {
-        const u = i / columns, v = j / rows, U = (i + 1) / columns, V = (j + 1) / rows;
-        quad(out, point(u, v), point(U, v), point(U, V), point(u, V), striped && i % 3 === 0 ? red : cream, [[u, v], [U, v], [U, V], [u, V]]);
+    function ring(center,axis,radius,tube,color,segments=24,sides=6,start=0,end=TAU) {
+      const u=normalize(cross(axis,Math.abs(axis[1])>.9?[1,0,0]:[0,1,0])),v=cross(axis,u);
+      const radial=a=>u.map((n,i)=>n*Math.cos(a)+v[i]*Math.sin(a));
+      const normal=(a,b)=>radial(a).map((n,i)=>n*Math.cos(b)+axis[i]*Math.sin(b));
+      const point=(a,b)=>center.map((n,i)=>n+radial(a)[i]*radius+normal(a,b)[i]*tube);
+      for(let i=0;i<segments;i+=1)for(let j=0;j<sides;j+=1){
+        const a=start+(end-start)*i/segments,A=start+(end-start)*(i+1)/segments,b=j/sides*TAU,B=(j+1)/sides*TAU;
+        quad(hull,point(a,b),point(A,b),point(A,B),point(a,B),color,undefined,[normal(a,b),normal(A,b),normal(A,B),normal(a,B)]);
       }
     }
-    sail(main, -.8, 1.75, 4.9, 1.92, false); sail(rear, 1.55, 2.25, 3.68, 1.29, true);
-    quad(rear, [-.8, 5.69, 0], [.22, 5.63, .08], [.12, 5.03, .02], [-.8, 5.11, 0], ink);
-    return { hull, main, rear };
-  }
+    // A curved, planked hull with raised ends and the Sunny's red/ivory strakes.
+    const sections=64;
+    function hullPoint(a,y,scale=1){
+      const c=Math.cos(a),s=Math.sin(a);
+      return [c*(c<0?3.18:2.96)*scale,y+.18*Math.pow(Math.abs(c),6),s*1.16*scale];
+    }
+    const strakes=[[-.78,.45,wood],[-.52,.75,wood],[-.28,.91,shade(wood,1.10)],[-.04,1,wood],[.20,1.045,shade(wood,1.12)],[.39,1.055,red],[.66,1.04,red],[.87,1,ivory],[.98,.99,cream]];
+    for(let r=1;r<strakes.length;r+=1)for(let i=0;i<sections;i+=1){
+      const a=i/sections*TAU,A=(i+1)/sections*TAU,[y,s,col]=strakes[r],[by,bs]=strakes[r-1];
+      const variation=.96+.07*Math.sin(i*1.83+r*3.17);
+      const color=r<=4?shade(col,variation):col;
+      const normal=t=>normalize([Math.cos(t)/3.1,.25,Math.sin(t)/1.16]);
+      quad(hull,hullPoint(a,y,s),hullPoint(A,y,s),hullPoint(A,by,bs),hullPoint(a,by,bs),color,undefined,[normal(a),normal(A),normal(A),normal(a)]);
+      if(r<=5)quad(hull,hullPoint(a,y-.012,s*1.001),hullPoint(A,y-.012,s*1.001),hullPoint(A,y+.006,s*1.001),hullPoint(a,y+.006,s*1.001),shade(color,.70));
+    }
+    function contour(y,scale,radius,color){path(Array.from({length:sections+1},(_,i)=>hullPoint(i/sections*TAU,y,scale)),radius,color);}
+    contour(.36,1.058,.032,gold);contour(.86,1.006,.035,gold);contour(1.01,.99,.065,darkWood);
+    // Individually jointed deck planks stop at the curved gunwale.
+    for(let i=0;i<30;i+=1){
+      const x=-3.06+i*.20,z=1.12*Math.sqrt(Math.max(0,1-Math.pow(x/(x<0?3.18:2.96),2)));
+      box(x,.965,0,.188,.035,z*2,shade(cream,.84+.06*(i%3)));
+      if(i%2===0)box(x,.986,z*.28,.008,.006,z*1.2,darkWood);
+    }
+    // A grass deck, brass stanchions, two continuous rails, and mooring cleats.
+    box(-.23,1.0,0,2.45,.018,1.55,[.29,.46,.19]);
+    contour(1.15,.975,.023,cream);contour(1.44,.975,.043,gold);
+    for(let i=0;i<32;i+=1){const a=i/32*TAU;rod(hullPoint(a,1.02,.975),hullPoint(a,1.43,.975),.025,ivory,6);}
+    [-2.3,2.2].forEach(x=>[-1,1].forEach(side=>{
+      rod([x,1.06,side*.84],[x,1.21,side*.84],.055,ink,8);
+      rod([x-.12,1.18,side*.84],[x+.12,1.18,side*.84],.035,gold,8);
+    }));
+    // Round dock hatches and brass-rimmed cannon ports on both sides.
+    [-1,1].forEach(side=>{
+      [-1.95,-.75,.55,1.75].forEach((x,i)=>{
+        const z=side*1.16*Math.sqrt(1-x*x/11),axis=[0,0,side],y=.65;
+        rod([x,y,z],[x,y,z+side*.04],.16,ink,16);
+        ring([x,y,z+side*.055],axis,.158,.026,gold,20);
+        if(i===0||i===2){rod([x,y,z],[x,y,z+side*.32],.079,ink,12,.095);ring([x,y,z+side*.32],axis,.085,.018,gold,16);}
+        else{
+          rod([x,y,z+side*.043],[x,y,z+side*.051],.127,glass,16);
+          rod([x-.09,y,z+side*.06],[x+.09,y,z+side*.06],.014,gold,6);
+        }
+      });
+      const center=[.10,.20,side*1.25];
+      rod([center[0],center[1],center[2]-side*.04],center,.28,ivory,24);
+      ring(center,[0,0,side],.265,.035,gold,24);
+      rod([-.03,.20,side*1.29],[.23,.20,side*1.29],.025,ink,8);
+      for(let i=0;i<8;i+=1){const a=i/8*TAU;sphere([.1+Math.cos(a)*.23,.2+Math.sin(a)*.23,side*1.29],[.022,.022,.014],gold,8,4);}
+    });
+    // Rounded two-storey stern cabin with fluted red eaves and framed windows.
+    rod([1.93,1.0,0],[1.93,1.92,0],.78,cream,32,.78);
+    ring([1.93,1.13,0],[0,1,0],.79,.05,red,32);
+    rod([1.93,1.91,0],[1.93,2.13,0],.94,red,32,.70);
+    ring([1.93,1.94,0],[0,1,0],.94,.035,gold,32);
+    for(let i=0;i<16;i+=1){const a=i/16*TAU;rod([1.93+Math.cos(a)*.91,1.95,Math.sin(a)*.91],[1.93+Math.cos(a)*.70,2.14,Math.sin(a)*.70],.015,shade(red,.75),5);}
+    rod([2.05,2.11,-.05],[2.05,2.63,-.05],.48,ivory,24);
+    rod([2.05,2.62,-.05],[2.05,2.83,-.05],.59,red,24,.20);
+    ring([2.05,2.64,-.05],[0,1,0],.59,.025,gold,24);
+    sphere([2.05,2.85,-.05],[.075,.10,.075],gold,12,8);
+    [0,.70,1.40,2.10,2.80,3.50,4.20,4.90,5.60].forEach(a=>{
+      const n=[Math.cos(a),0,Math.sin(a)],p=[1.93+n[0]*.79,1.53,n[2]*.79];
+      rod(p,p.map((v,i)=>v+n[i]*.035),.13,glass,16);
+      ring(p.map((v,i)=>v+n[i]*.045),n,.14,.023,gold,20);
+      rod([p[0],1.42,p[2]],[p[0],1.64,p[2]],.012,cream,6);
+    });
+    [-1,1].forEach(side=>{
+      const p=[2.05,2.36,side*.445];
+      box(p[0],p[1],p[2],.32,.27,.035,wood);
+      box(p[0],p[1],p[2]+side*.024,.255,.21,.018,glass);
+      box(p[0],p[1],p[2]+side*.038,.018,.21,.018,gold);
+    });
+    // Stair treads, hatch, barrels and a small working helm on the foredeck.
+    for(let i=0;i<6;i+=1)box(.72+i*.11,1.03+i*.085,.72,.16,.075,.44,wood);
+    box(-1.68,1.018,.15,.55,.035,.53,darkWood);
+    for(let i=0;i<6;i+=1)box(-1.88+i*.08,1.04,.15,.025,.024,.46,gold);
+    [[-2.1,1.18,-.43],[-1.58,1.17,-.65]].forEach(p=>{
+      rod([p[0],1.0,p[2]],[p[0],1.37,p[2]],.16,wood,12,.145);
+      [1.07,1.30].forEach(y=>ring([p[0],y,p[2]],[0,1,0],.159,.017,ink,12));
+    });
+    rod([-1.9,1.0,.55],[-1.9,1.62,.55],.055,wood,10);
+    ring([-1.9,1.61,.61],[0,0,1],.22,.025,wood,24);
+    for(let i=0;i<8;i+=1){const a=i/8*TAU;rod([-1.9,1.61,.61],[-1.9+Math.cos(a)*.29,1.61+Math.sin(a)*.29,.61],.015,gold,6);}
+    sphere([-1.9,1.61,.63],[.065,.065,.028],gold,12,6);
+    // Tangerine grove on a little stern balcony, with visible individual fruit.
+    box(2.53,1.54,-.42,.79,.12,1.20,wood);
+    [[2.45,-.80],[2.80,-.38],[2.48,.02]].forEach(([x,z],i)=>{
+      rod([x,1.6,z],[x,2.17+i*.06,z],.035,wood,8);
+      [[0,.08,0],[-.14,-.02,.02],[.13,0,.04],[0,-.03,-.13]].forEach(([dx,dy,dz],j)=>sphere([x+dx,2.23+dy+i*.06,z+dz],[.22,.22,.20],j%2?[.22,.43,.15]:[.32,.54,.19],12,7));
+      for(let j=0;j<4;j+=1){const a=j/4*TAU+i;sphere([x+Math.cos(a)*.19,2.19+(j%2)*.13+i*.06,z+Math.sin(a)*.19],[.045,.047,.045],[1,.49,.09],8,5);}
+    });
+    // Stern exhaust, a rudder and a life ring give the back a finished profile.
+    rod([2.78,.23,0],[3.24,.23,0],.31,wood,24,.36);
+    ring([3.24,.23,0],[1,0,0],.34,.055,gold,24);
+    rod([3.24,.23,0],[3.26,.23,0],.275,ink,24);
+    box(2.91,-.36,0,.20,.83,.10,darkWood);
+    ring([1.06,1.27,1.12],[0,0,1],.19,.055,ivory,24);
+    for(let i=0;i<4;i+=1)ring([1.06,1.27,1.12],[0,0,1],.19,.057,red,3,6,i*Math.PI/2,i*Math.PI/2+.30);
 
+    // The lion is sculpted in a forward-facing local frame, not a flat badge.
+    const faceNormal=normalize([-.76,0,.65]),faceRight=[faceNormal[2],0,-faceNormal[0]];
+    const faceAxes=[faceRight,[0,1,0],faceNormal],head=[-3.04,1.29,.05];
+    const fp=p=>along(head,faceAxes,p);
+    const faceSphere=(p,size,color,slices=20,bands=12,basis=faceAxes)=>sphere(fp(p),size,color,slices,bands,basis);
+    faceSphere([0,0,-.06],[.70,.70,.30],gold,28,16);
+    for(let i=0;i<16;i+=1){
+      const a=i/16*TAU,r=.72;
+      const tangent=faceRight.map((n,j)=>n*Math.cos(a)-axes[1][j]*Math.sin(a));
+      const radial=faceRight.map((n,j)=>n*Math.sin(a)+axes[1][j]*Math.cos(a));
+      faceSphere([Math.sin(a)*r,Math.cos(a)*r,-.015],[.135,.235,.15],i%2?[.90,.42,.10]:[1,.58,.13],12,7,[tangent,radial,faceNormal]);
+    }
+    [-1,1].forEach(side=>{
+      faceSphere([side*.43,.43,.20],[.14,.16,.10],gold,16,8);
+      faceSphere([side*.43,.44,.28],[.078,.085,.035],[.85,.46,.25],12,6);
+    });
+    faceSphere([0,0,.20],[.52,.52,.235],ivory,32,20);
+    [-1,1].forEach(side=>{
+      faceSphere([side*.19,.12,.423],[.055,.070,.027],ink,16,10);
+      faceSphere([side*.18,.14,.449],[.013,.016,.008],ivory,8,5);
+      faceSphere([side*.17,-.12,.435],[.20,.135,.065],cream,20,10);
+      path(Array.from({length:9},(_,j)=>fp([side*.19+(j/8-.5)*.16,.24+.035*Math.sin(j/8*Math.PI),.395])),.015,wood);
+    });
+    triangle(hull,fp([-.075,-.045,.511]),fp([.075,-.045,.511]),fp([0,-.13,.531]),ink);
+    const smile=Array.from({length:17},(_,i)=>fp([Math.cos(Math.PI+i/16*Math.PI)*.265,-.15+Math.sin(Math.PI+i/16*Math.PI)*.17,.441]));
+    path(smile,.020,ink,8);rod(fp([0,-.12,.49]),fp([0,-.225,.49]),.015,ink,8);
+    [-1,1].forEach(side=>faceSphere([side*.34,-.07,.395],[.055,.027,.014],[.93,.63,.37],12,6));
+    // Bone-shaped white supports beneath the sunflower lion.
+    [[[-.49,-.65,.06],[.49,-.82,.06]],[[-.49,-.82,.06],[.49,-.65,.06]]].forEach(([a,b])=>{
+      rod(fp(a),fp(b),.052,ivory,10);[a,b].forEach(p=>faceSphere(p,[.085,.085,.068],ivory,12,8));
+    });
+    rod([-2.70,1.14,-.1],[-4.0,1.62,-.1],.055,wood,12,.025);
+    path([[-4,1.62,-.1],[-3.5,.56,-.05],[-2.65,.4,0]],.018,rope);
+
+    // Tapered masts, brass bindings, yardarms and a proper lookout basket.
+    rod([-.72,.98,0],[-.72,6.50,0],.11,wood,16,.048);
+    rod([1.52,1.05,-.12],[1.52,4.98,-.12],.073,wood,12,.035);
+    for(let y=1.3;y<6;y+=.65)ring([-.72,y,0],[0,1,0],.097-y*.006,.012,gold,12);
+    rod([-2.94,5.49,.04],[1.50,5.49,.04],.065,wood,12,.055);
+    rod([.15,4.50,-.06],[2.89,4.50,-.06],.049,wood,10);
+    rod([-.72,5.77,0],[-.72,5.99,0],.29,wood,24,.36);
+    ring([-.72,5.99,0],[0,1,0],.36,.045,gold,24);
+    ring([-.72,6.17,0],[0,1,0],.36,.025,cream,24);
+    for(let i=0;i<10;i+=1){const a=i/10*TAU;rod([-.72+Math.cos(a)*.35,5.97,Math.sin(a)*.35],[-.72+Math.cos(a)*.35,6.17,Math.sin(a)*.35],.015,cream,5);}
+    // Standing rigging and ratlines are behind the billowing cloth.
+    path([[-4.0,1.62,-.1],[-.72,6.31,-.12],[2.90,1.30,-.35]],.017,rope);
+    [-1,1].forEach(side=>{
+      const top=[-.72,5.75,-.10],left=[-1.75,1.10,side*.98],right=[.34,1.10,side*.98];
+      [left,right,[-.72,1.10,side*1.04]].forEach(p=>rod(p,top,.013,rope,5));
+      for(let i=1;i<14;i+=1){const f=i/15;path([left.map((v,j)=>v+(top[j]-v)*f),right.map((v,j)=>v+(top[j]-v)*f)],.0085,rope,4);}
+      rod([1.52,4.91,-.12],[2.65,1.34,side*.67],.013,rope,5);
+    });
+    function sail(out,center,bottom,top,halfWidth,striped,zOffset=0){
+      const columns=24,rows=18;
+      function point(u,v){return[center+(u-.5)*halfWidth*2*(.82+.18*v),bottom+v*(top-bottom)-.11*Math.sin(u*Math.PI),zOffset+.15+.66*Math.sin(u*Math.PI)*Math.sin(v*Math.PI)];}
+      function normal(u,v){return normalize(cross([2*halfWidth*(.82+.18*v),-.11*Math.PI*Math.cos(u*Math.PI),.66*Math.PI*Math.cos(u*Math.PI)*Math.sin(v*Math.PI)],[(u-.5)*halfWidth*.36,top-bottom,.66*Math.PI*Math.sin(u*Math.PI)*Math.cos(v*Math.PI)]));}
+      for(let i=0;i<columns;i+=1)for(let j=0;j<rows;j+=1){
+        const u=i/columns,v=j/rows,U=(i+1)/columns,V=(j+1)/rows;
+        quad(out,point(u,v),point(U,v),point(U,V),point(u,V),striped&&Math.floor(i/4)%2===0?red:cream,[[u,v],[U,v],[U,V],[u,V]],[normal(u,v),normal(U,v),normal(U,V),normal(u,V)]);
+      }
+      [0,1].forEach(u=>path(Array.from({length:19},(_,j)=>point(u,j/18)),.018,rope));
+      [0,1].forEach(v=>path(Array.from({length:25},(_,i)=>point(i/24,v)),.020,rope));
+      for(let i=0;i<=12;i+=1){const p=point(i/12,1);rod([p[0],top+.06,p[2]],p,.012,rope,5);}
+      return point;
+    }
+    sail(main,-.72,2.05,5.43,2.13,false);
+    sail(rear,1.52,2.95,4.44,1.31,true,-.17);
+    // The small pirate pennant uses the same printed emblem as the main sail.
+    const flagPoint=(u,v)=>[-.72+u*1.05,6.06+v*.46-.055*Math.sin(u*Math.PI),.04+.09*Math.sin(u*5)];
+    for(let i=0;i<12;i+=1)for(let j=0;j<4;j+=1){const u=i/12,U=(i+1)/12,v=j/4,V=(j+1)/4;quad(main,flagPoint(u,v),flagPoint(U,v),flagPoint(U,V),flagPoint(u,V),ink,[[u,v],[U,v],[U,V],[u,V]]);}
+    canvas.dataset.shipTriangles=String((hull.length+main.length+rear.length)/33);
+    return {hull,main,rear};
+  }
   function upload(vertices) {
     const buffer = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, buffer); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
     return { buffer, count: vertices.length / 11 };
   }
   function makeFlag() {
-    const image = document.createElement("canvas"); image.width = 256; image.height = 256;
+    const image = document.createElement("canvas");
+    image.width = 512; image.height = 512;
     const c = image.getContext("2d");
     if (c) {
-      c.translate(128, 140); c.lineCap = "round"; c.lineJoin = "round";
-      function bones(color, width) { c.strokeStyle = color; c.lineWidth = width; [[-62, -38, 61, 54], [61, -38, -61, 54]].forEach(a => { c.beginPath(); c.moveTo(a[0], a[1]); c.lineTo(a[2], a[3]); c.stroke(); }); }
-      bones("#293a39", 17); bones("#f8f0d9", 11);
-      c.fillStyle = "#f9f2db"; c.strokeStyle = "#293a39"; c.lineWidth = 3;
-      c.beginPath(); c.ellipse(0, -5, 40, 35, 0, 0, Math.PI * 2); c.fill(); c.stroke();
-      c.fillRect(-25, 16, 50, 29); c.strokeRect(-25, 16, 50, 29);
-      c.fillStyle = "#293a39"; [-15, 15].forEach(x => { c.beginPath(); c.ellipse(x, -6, 9, 12, x * .014, 0, Math.PI * 2); c.fill(); });
-      c.beginPath(); c.moveTo(0, 8); c.lineTo(-5, 16); c.lineTo(5, 16); c.fill();
-      c.lineWidth = 2; c.beginPath(); c.moveTo(-24, 31); c.lineTo(24, 31); [-12, 0, 12].forEach(x => { c.moveTo(x, 20); c.lineTo(x, 43); }); c.stroke();
-      c.fillStyle = "#dab15e"; c.beginPath(); c.ellipse(0, -35, 53, 12, 0, 0, Math.PI * 2); c.fill(); c.stroke();
-      c.beginPath(); c.moveTo(-31, -38); c.quadraticCurveTo(-33, -74, 0, -74); c.quadraticCurveTo(33, -74, 31, -38); c.closePath(); c.fill(); c.stroke();
-      c.fillStyle = "#b84a35"; c.fillRect(-31, -47, 62, 9);
+      // The fabric stays translucent: the sail's cream vertex material supplies
+      // its base colour, and this atlas adds stitching and the printed emblem.
+      const wash = c.createLinearGradient(0, 0, 512, 512);
+      wash.addColorStop(0, "rgba(255,250,224,.055)");
+      wash.addColorStop(.48, "rgba(255,250,224,0)");
+      wash.addColorStop(1, "rgba(113,80,40,.035)");
+      c.fillStyle = wash; c.fillRect(0, 0, 512, 512);
+      c.lineWidth = .65;
+      for (let i = 2; i < 512; i += 4) {
+        c.strokeStyle = i % 12 === 2 ? "rgba(118,91,49,.045)" : "rgba(255,248,218,.035)";
+        c.beginPath(); c.moveTo(i, 0); c.lineTo(i, 512); c.stroke();
+        c.strokeStyle = "rgba(118,91,49,.025)";
+        c.beginPath(); c.moveTo(0, i); c.lineTo(512, i); c.stroke();
+      }
+      c.strokeStyle = "rgba(121,91,49,.17)"; c.lineWidth = 2;
+      c.strokeRect(12, 12, 488, 488);
+      c.strokeStyle = "rgba(255,249,220,.27)"; c.lineWidth = 1;
+      c.strokeRect(16, 16, 480, 480);
+      c.strokeStyle = "rgba(116,86,46,.22)"; c.lineWidth = 1.1;
+      for (let i = 24; i <= 488; i += 9) {
+        c.beginPath();
+        c.moveTo(i - 2, 9); c.lineTo(i + 2, 16);
+        c.moveTo(i - 2, 496); c.lineTo(i + 2, 503);
+        c.moveTo(9, i - 2); c.lineTo(16, i + 2);
+        c.moveTo(496, i - 2); c.lineTo(503, i + 2);
+        c.stroke();
+      }
+      c.strokeStyle = "rgba(122,94,54,.11)"; c.lineWidth = 1.2;
+      [128, 256, 384].forEach(x => {
+        c.beginPath(); c.moveTo(x, 18); c.lineTo(x, 494); c.stroke();
+        c.strokeStyle = "rgba(255,249,225,.20)";
+        c.beginPath(); c.moveTo(x + 2, 18); c.lineTo(x + 2, 494); c.stroke();
+        c.strokeStyle = "rgba(122,94,54,.11)";
+      });
+
+      c.save(); c.translate(256, 290);
+      c.lineJoin = "round"; c.lineCap = "round";
+      const ink = "#223735", ivory = "#fff7dc";
+      function bone(angle) {
+        c.save(); c.translate(0, 15); c.rotate(angle);
+        c.fillStyle = ivory; c.strokeStyle = ink; c.lineWidth = 5;
+        c.beginPath();
+        c.moveTo(-132, -9); c.lineTo(132, -9);
+        c.bezierCurveTo(136, -26, 158, -28, 163, -13);
+        c.bezierCurveTo(171, -6, 166, 0, 160, 3);
+        c.bezierCurveTo(174, 15, 157, 30, 143, 21);
+        c.quadraticCurveTo(135, 17, 132, 9); c.lineTo(-132, 9);
+        c.bezierCurveTo(-138, 27, -159, 27, -164, 13);
+        c.quadraticCurveTo(-169, 4, -160, -3);
+        c.bezierCurveTo(-173, -15, -158, -29, -145, -22);
+        c.quadraticCurveTo(-135, -18, -132, -9);
+        c.closePath(); c.fill(); c.stroke();
+        c.strokeStyle = "rgba(136,109,65,.32)"; c.lineWidth = 2;
+        c.beginPath(); c.moveTo(-124, 4); c.lineTo(126, 4); c.stroke();
+        c.restore();
+      }
+      bone(.57); bone(-.57);
+
+      // One continuous silhouette keeps the round cranium and grin readable at
+      // small sizes, while the asymmetric sockets give the printed mark life.
+      c.fillStyle = ivory; c.strokeStyle = ink; c.lineWidth = 5.8;
+      c.beginPath(); c.moveTo(-53, 24);
+      c.bezierCurveTo(-86, 10, -94, -37, -72, -67);
+      c.bezierCurveTo(-43, -108, 42, -108, 72, -67);
+      c.bezierCurveTo(95, -36, 86, 10, 53, 24);
+      c.lineTo(51, 65); c.quadraticCurveTo(0, 98, -51, 65);
+      c.closePath(); c.fill(); c.stroke();
+      c.fillStyle = ink;
+      [[-30, -.14], [30, .14]].forEach(([x, angle]) => {
+        c.beginPath(); c.ellipse(x, -20, 19, 23, angle, 0, Math.PI * 2); c.fill();
+      });
+      c.beginPath(); c.moveTo(0, 9); c.lineTo(-10, 28);
+      c.quadraticCurveTo(0, 23, 10, 28); c.closePath(); c.fill();
+      c.strokeStyle = ink; c.lineWidth = 4;
+      c.beginPath(); c.moveTo(-51, 34); c.quadraticCurveTo(0, 53, 51, 34); c.stroke();
+      c.beginPath(); c.moveTo(-51, 58); c.quadraticCurveTo(0, 83, 51, 58); c.stroke();
+      [-31, -10, 10, 31].forEach(x => {
+        const edge = Math.abs(x) / 51;
+        c.beginPath(); c.moveTo(x, 42 - 5 * edge);
+        c.lineTo(x, 78 - 11 * edge); c.stroke();
+      });
+
+      // Straw brim, rounded crown, woven strokes and a vermilion hat band.
+      c.strokeStyle = ink; c.lineWidth = 5;
+      const straw = c.createLinearGradient(0, -155, 0, -67);
+      straw.addColorStop(0, "#eed18b"); straw.addColorStop(1, "#c89c4b");
+      c.fillStyle = straw;
+      c.beginPath(); c.ellipse(0, -81, 112, 24, -.035, 0, Math.PI * 2); c.fill(); c.stroke();
+      c.save();
+      c.beginPath(); c.ellipse(0, -81, 108, 21, -.035, 0, Math.PI * 2); c.clip();
+      c.strokeStyle = "rgba(112,76,30,.34)"; c.lineWidth = 1.6;
+      for (let x = -104; x <= 104; x += 11) {
+        c.beginPath(); c.moveTo(x, -98); c.lineTo(x + 9, -64); c.stroke();
+      }
+      c.beginPath(); c.ellipse(0, -80, 101, 15, -.035, 0, Math.PI * 2); c.stroke();
+      c.restore();
+      c.fillStyle = straw; c.strokeStyle = ink; c.lineWidth = 5;
+      c.beginPath(); c.moveTo(-66, -86);
+      c.bezierCurveTo(-65, -129, -45, -154, 0, -154);
+      c.bezierCurveTo(47, -154, 65, -130, 66, -86);
+      c.quadraticCurveTo(0, -67, -66, -86); c.closePath(); c.fill(); c.stroke();
+      c.save(); c.clip();
+      c.strokeStyle = "rgba(126,86,34,.33)"; c.lineWidth = 1.5;
+      for (let x = -57; x <= 57; x += 11) {
+        c.beginPath(); c.moveTo(x * .72, -149);
+        c.quadraticCurveTo(x, -128, x * 1.13, -91); c.stroke();
+      }
+      [-137, -125, -113].forEach(y => {
+        c.beginPath(); c.moveTo(-65, y);
+        c.quadraticCurveTo(0, y + 10, 65, y); c.stroke();
+      });
+      c.restore();
+      c.fillStyle = "#be4933"; c.strokeStyle = "#8e372b"; c.lineWidth = 2.2;
+      c.beginPath(); c.moveTo(-65, -104);
+      c.quadraticCurveTo(0, -86, 65, -104); c.lineTo(66, -88);
+      c.quadraticCurveTo(0, -69, -66, -88); c.closePath(); c.fill(); c.stroke();
+      c.strokeStyle = "rgba(255,214,155,.44)"; c.lineWidth = 1.5;
+      c.beginPath(); c.moveTo(-59, -101); c.quadraticCurveTo(0, -87, 59, -101); c.stroke();
+      c.restore();
     }
     const texture = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, texture); gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
@@ -255,7 +533,7 @@
   function cacheShipAnchor() {
     if (!shipSpace) { shipAnchor = null; return; }
     const rect = shipSpace.getBoundingClientRect();
-    shipAnchor = { x: rect.left + rect.width * .5, y: rect.bottom - 54, span: Math.min(rect.width * .82, 280) };
+    shipAnchor = { x: rect.left + rect.width * .5, y: rect.bottom - (width <= 560 ? 100 : 54), span: Math.min(rect.width * .82, 280) };
   }
   function draw(t) {
     if (lost) return;
@@ -272,7 +550,7 @@
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, oceanMesh.index); gl.uniformMatrix4fv(sea.uniforms.uVP, false, vp);
     gl.uniform1f(sea.uniforms.uTime, t); gl.uniform3fv(sea.uniforms.uEye, eye); gl.uniform2f(sea.uniforms.uResolution, canvas.width, canvas.height);
     gl.drawElements(gl.TRIANGLES, oceanMesh.count, gl.UNSIGNED_SHORT, 0);
-    let bx = 8.8, bz = -10, boatScale = 1.2, drawShip = true;
+    let bx = 8.8, bz = -10, boatScale = 1.32, drawShip = true;
     if (mobile && shipAnchor) {
       // Intersect the journal's boat position with the sea plane. Moving only
       // clip-space Y makes an otherwise visible boat disappear behind the water.
@@ -294,13 +572,13 @@
     }
     if (drawShip) {
     const bob = Math.sin(bx * .34 + bz * .18 - t * .86) * .23 + Math.sin(t * 1.19) * .07;
-    const model = matrix.boat(bx, bob + .12, bz, -.28 + px * .025, Math.sin(t * .86) * .025, Math.sin(t * .63) * .018, boatScale);
+    const model = matrix.boat(bx, bob + .12, bz, .30 + px * .04, Math.sin(t * .86) * .025, Math.sin(t * .63) * .018, boatScale);
     useProgram(boat.id); gl.uniformMatrix4fv(boat.uniforms.uVP, false, vp); gl.uniformMatrix4fv(boat.uniforms.uModel, false, model);
-    gl.uniform2f(boat.uniforms.uClipShift, 0, 0);
+    gl.uniform2f(boat.uniforms.uClipShift, 0, 0); gl.uniform1f(boat.uniforms.uTime, t); gl.uniform3fv(boat.uniforms.uEye, eye);
     gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, flagTexture); gl.uniform1i(boat.uniforms.uFlag, 0);
-    [[hullMesh, 0], [rearMesh, 0], [sailMesh, 1]].forEach(([mesh, textured]) => {
+    [[hullMesh, 0, 0], [rearMesh, 0, 1], [sailMesh, 1, 1]].forEach(([mesh, textured, cloth]) => {
       gl.bindBuffer(gl.ARRAY_BUFFER, mesh.buffer); bindAttribute(boat.id, "aPosition", 3, 44, 0); bindAttribute(boat.id, "aNormal", 3, 44, 12); bindAttribute(boat.id, "aColor", 3, 44, 24); bindAttribute(boat.id, "aUv", 2, 44, 36);
-      gl.uniform1f(boat.uniforms.uTextured, textured); gl.drawArrays(gl.TRIANGLES, 0, mesh.count);
+      gl.uniform1f(boat.uniforms.uTextured, textured); gl.uniform1f(boat.uniforms.uCloth, cloth); gl.drawArrays(gl.TRIANGLES, 0, mesh.count);
     });
     }
     frame += 1;
