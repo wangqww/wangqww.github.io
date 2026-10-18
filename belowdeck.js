@@ -9,7 +9,7 @@
   if (!journal || !hero || !motion) return;
   const reduced = matchMedia("(prefers-reduced-motion: reduce)");
   const chapters = ["about", "research", "logbook", "contact"].map(id => document.getElementById(id)).filter(Boolean);
-  const scenery = [...chapters, document.getElementById("memories")].filter(Boolean);
+  const scenery = chapters;
   const names = { about: "About", research: "Research", logbook: "Logbook", contact: "Contact" };
   const clamp = value => Math.max(0, Math.min(1, value));
   const rail = document.createElement("nav");
