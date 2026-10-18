@@ -1,0 +1,60 @@
+/* Three keepsakes from the Grand Line, set into the researcher's travel journal. */
+.op-memories{position:relative;padding-top:24px;padding-bottom:94px}
+.op-memories-heading{position:relative;display:flex;justify-content:space-between;align-items:center;gap:44px;padding-top:33px;margin-bottom:35px;border-top:1px solid var(--line,#dce6e4)}
+.op-memories .op-memories-kicker{margin:0 0 16px;color:var(--sea,#277e8c);font:600 9px/1.7 var(--sans,sans-serif);letter-spacing:2px}
+.op-memories #memories-title{max-width:640px;margin:0;color:var(--ink,#123845);font:500 42px/1.16 var(--sans,sans-serif);letter-spacing:-1.5px}
+.op-memories .op-memories-intro{margin:17px 0 0;color:var(--muted,#647a80);font:400 13px/1.8 var(--sans,sans-serif)}
+.op-strawhat-charm{flex:none;width:96px;height:112px;align-self:flex-start;margin-right:20px;margin-top:-34px;overflow:visible;transform:translateY(calc(var(--deck-travel,0)*7px)) rotate(calc(var(--deck-travel,0)*4deg));transform-origin:60% 0;transition:transform .22s ease-out;pointer-events:none;filter:drop-shadow(0 5px 5px #7b856317)}
+.op-memory-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:23px;perspective:1400px}
+.op-memories .op-memory-card{position:relative;min-width:0;margin:0;border:1px solid #dce5dd;border-radius:14px;background:#fffef9;overflow:hidden;box-shadow:0 9px 22px -20px #204b3f50;transition:opacity .65s ease,transform .2s ease-out,border-color .25s,box-shadow .25s}
+.op-memories .op-memory-card:hover,.op-memories .op-memory-card:focus-within{border-color:#b9cfc0;box-shadow:0 21px 35px -26px #234b4670}
+.voyage-enhanced .op-memories .op-memory-card.is-revealed[data-tilt]{transform:perspective(1100px) rotateX(calc(var(--tilt-x,0deg)*.45)) rotateY(calc(var(--tilt-y,0deg)*.45))}
+.op-memory-image{position:relative;padding:12px 12px 0;background:#f0f4ed}
+.op-memories .op-memory-image img{display:block;width:100%;height:auto;aspect-ratio:3/2;object-fit:contain;border-radius:7px;background:#edf2eb}
+.op-memory-image::after{content:"";position:absolute;inset:12px 12px 0;border:1px solid #163c420d;border-radius:7px;pointer-events:none}
+.op-memories .op-memory-card figcaption{padding:25px 25px 27px}
+.op-memories .op-memory-coordinate{margin:0 0 14px;color:#75948a;font:500 8px/1.7 var(--sans,sans-serif);letter-spacing:1.7px}
+.op-memories .op-memory-card h3{margin:0 0 12px;color:#234b4c;font:400 27px/1.14 var(--serif,Georgia,serif);letter-spacing:-.25px}
+.op-memories .op-memory-note{margin:0;color:#72847c;font:400 11px/1.85 var(--sans,sans-serif);max-width:270px}
+.op-memories-footnote{position:relative;display:flex;align-items:center;gap:13px;padding-top:25px;padding-right:65px;min-height:58px}
+.op-memories .op-memories-footnote p{margin:0;color:#8a9a90;font:400 italic 13px/1.7 var(--serif,Georgia,serif);letter-spacing:.1px}
+.op-memory-rule{display:block;width:28px;height:1px;flex:none;background:#b6cbbd}
+.op-vivre-charm{position:absolute;right:9px;top:8px;width:42px;height:53px;overflow:visible;pointer-events:none;transform:translateY(calc(var(--deck-travel,0)*-5px)) rotate(calc(var(--deck-travel,0)*-4deg));transform-origin:50% 0;transition:transform .22s ease-out;filter:drop-shadow(0 3px 4px #72856c12)}
+@media(max-width:1100px){.op-memory-grid{gap:17px}.op-memories .op-memory-card figcaption{padding:23px 20px}.op-memories .op-memory-card h3{font-size:24px}.op-memories #memories-title{font-size:39px}}
+@media(max-width:800px){
+  .op-memories{padding-top:4px;padding-bottom:70px}
+  .op-memories-heading{gap:24px;margin-bottom:27px;padding-top:30px}
+  .op-memories #memories-title{font-size:35px;max-width:500px;letter-spacing:-1.2px}
+  .op-strawhat-charm{width:72px;height:84px;margin-right:0;margin-top:-26px}
+  .op-memory-grid{grid-template-columns:1fr;gap:21px}
+  .op-memories .op-memory-card{display:grid;grid-template-columns:1.1fr 1fr}
+  .op-memory-image{padding:12px;align-self:stretch;display:flex;align-items:center}
+  .op-memory-image::after{inset:12px}
+  .op-memories .op-memory-image img{height:auto;min-height:0}
+  .op-memories .op-memory-card figcaption{align-self:center;padding:24px}
+  .op-memories .op-memory-card h3{font-size:27px}
+  .op-memories .op-memory-note{font-size:11px}
+}
+@media(max-width:560px){
+  .op-memories{padding-top:0;padding-bottom:60px}
+  .op-memories-heading{padding-top:27px;gap:12px;margin-bottom:26px}
+  .op-memories .op-memories-kicker{max-width:230px;font-size:7px;letter-spacing:1.4px;margin-bottom:14px}
+  .op-memories #memories-title{font-size:30px;letter-spacing:-1px;max-width:270px}
+  .op-memories .op-memories-intro{font-size:11px;margin-top:14px;max-width:220px}
+  .op-strawhat-charm{position:absolute;top:28px;right:-2px;width:55px;height:65px;margin:0;opacity:.85}
+  .op-memories-heading>div{padding-right:36px}
+  .op-memory-grid{gap:24px}
+  .op-memories .op-memory-card{display:block;border-radius:12px}
+  .op-memory-image{display:block;padding:11px 11px 0}
+  .op-memory-image::after{inset:11px 11px 0}
+  .op-memories .op-memory-card figcaption{padding:23px 24px 25px}
+  .op-memories .op-memory-card h3{font-size:27px;max-width:270px;margin-bottom:11px}
+  .op-memories .op-memory-coordinate{font-size:7px;margin-bottom:12px}
+  .op-memories .op-memory-note{font-size:11px;max-width:270px}
+  .op-memories-footnote{padding-top:22px;padding-right:48px;gap:10px}
+  .op-memories .op-memories-footnote p{font-size:12px;max-width:240px}
+  .op-memory-rule{width:18px}
+  .op-vivre-charm{width:35px;height:44px;right:0;top:16px}
+}
+html[data-sea-motion=paused] .op-strawhat-charm,html[data-sea-motion=paused] .op-vivre-charm,html[data-sea-motion=paused] .op-memories .op-memory-card.is-revealed[data-tilt]{transform:none;transition:none}
+@media(prefers-reduced-motion:reduce){.op-strawhat-charm,.op-vivre-charm,.voyage-enhanced .op-memories .op-memory-card.is-revealed[data-tilt]{transform:none;transition:none}.op-memories .op-memory-card{transition:none}}

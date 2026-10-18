@@ -1,0 +1,108 @@
+/* The quieter part of the voyage: depth, chart marks, and movement tied to reading. */
+.atlas-journal .aj-about{position:relative}
+.atlas-journal .aj-profile{position:relative;isolation:isolate}
+.atlas-journal .aj-profile::before{content:"";position:absolute;left:-20px;top:-28px;width:calc(100% + 54px);aspect-ratio:1;border:1px solid #b6d0c775;border-radius:50%;background:linear-gradient(90deg,transparent 49.85%,#abc8bd55 50%,transparent 50.15%),linear-gradient(0deg,transparent 49.85%,#abc8bd55 50%,transparent 50.15%);box-shadow:0 0 0 13px #d7e4dc20,0 0 0 14px #c3d8ce55;transform:translateY(calc(var(--deck-travel,0)*12px));transition:transform .18s linear;pointer-events:none;z-index:-1}
+.atlas-journal .aj-profile::after{content:"";position:absolute;right:-24px;top:26px;width:22px;height:22px;border:1px solid #91b4a8;background:var(--paper);transform:translateY(calc(var(--deck-travel,0)*-8px)) rotate(45deg);box-shadow:inset 0 0 0 7px var(--paper),inset 0 0 0 8px #91b4a8;transition:transform .18s linear;pointer-events:none;z-index:0}
+.atlas-journal .aj-profile-figure{position:relative;z-index:1}
+.atlas-journal .aj-portrait{position:relative;isolation:isolate;background:#f8f9f3;border-color:#d5e0d7;box-shadow:0 17px 35px -22px #1238456b,0 2px 6px #12384506}
+.atlas-journal .aj-portrait::before{content:"";position:absolute;inset:8px -7px -8px 7px;border:1px solid #d8e2d9;border-radius:19px;background:#e9efe5;transform:rotate(4deg);z-index:-1;pointer-events:none}
+.atlas-journal .aj-about-copy h2{position:relative}
+.atlas-journal .aj-about-copy h2::after{content:"";display:block;width:42px;height:2px;background:linear-gradient(90deg,#6aa59d,#c8d9cc);margin-top:23px;transform:scaleX(calc(.55 + var(--deck-progress,1)*.45));transform-origin:left;transition:transform .18s linear;pointer-events:none}
+.atlas-journal .aj-social-links a{position:relative;padding-bottom:4px}
+.atlas-journal .aj-social-links a::after{content:"";position:absolute;bottom:0;left:0;right:20px;height:1px;background:#77aaa3;transform:scaleX(0);transform-origin:left;transition:transform .25s;pointer-events:none}
+.atlas-journal .aj-social-links a:hover::after,.atlas-journal .aj-social-links a:focus-visible::after{transform:scaleX(1)}
+.atlas-journal .aj-news-list>div,.atlas-journal .aj-news-older>div{position:relative;border-bottom:1px solid #e6ece5;padding-block:11px;transition:background .2s}
+.atlas-journal .aj-news-list>div::before,.atlas-journal .aj-news-older>div::before{content:"";position:absolute;left:-12px;top:21px;width:4px;height:4px;border-radius:50%;background:#92b3a7;opacity:0;transition:opacity .2s;pointer-events:none}
+.atlas-journal .aj-news-list>div:hover,.atlas-journal .aj-news-list>div:focus-within,.atlas-journal .aj-news-older>div:hover{background:#e9f2ec55}
+.atlas-journal .aj-news-list>div:hover::before,.atlas-journal .aj-news-list>div:focus-within::before,.atlas-journal .aj-news-older>div:hover::before{opacity:1}
+.atlas-journal .aj-research-vignette{transform:translateY(calc(var(--deck-travel,0)*12px));transition:transform .18s linear;filter:drop-shadow(0 8px 7px #486b5c09)}
+.atlas-journal .aj-research-toolbar{position:relative}
+.atlas-journal .aj-research-toolbar::after{content:"";position:absolute;left:0;bottom:-1px;width:86px;height:2px;background:#6a9c98;transform:scaleX(calc(.3 + var(--deck-progress,1)*.7));transform-origin:left;transition:transform .18s linear;pointer-events:none}
+.atlas-journal .paper{position:relative;isolation:isolate;transform-style:preserve-3d;box-shadow:0 6px 18px -14px #12384530,0 1px 3px #12384505;transition:opacity .65s ease,transform .18s ease-out,box-shadow .3s,border-color .3s}
+.atlas-journal .paper::after{content:"";position:absolute;inset:0;border-radius:inherit;background:radial-gradient(ellipse at var(--glow-x,50%) var(--glow-y,50%),#a3d3cd1f,transparent 58%);box-shadow:inset 0 0 0 1px #6da89d1c;opacity:0;transition:opacity .25s;pointer-events:none;z-index:2}
+.atlas-journal .paper:hover,.atlas-journal .paper:focus-within{border-color:#b3cdc6;box-shadow:0 25px 40px -30px #12384580,0 3px 10px #12384508}
+.atlas-journal .paper:hover::after,.atlas-journal .paper:focus-within::after{opacity:1}
+.voyage-enhanced .atlas-journal .paper.is-revealed[data-tilt]{transform:perspective(1100px) rotateX(calc(var(--tilt-x,0deg)*.5)) rotateY(calc(var(--tilt-y,0deg)*.5))}
+.atlas-journal .aj-paper-image{background:linear-gradient(145deg,#eef4ee,#f4f7f3 65%)}
+.atlas-journal .aj-paper-image>img{box-shadow:0 3px 10px #2a534909}
+.atlas-journal .aj-paper-number{font:400 23px/1 var(--serif);color:#8ba7a0;letter-spacing:-1px}
+.atlas-journal .aj-paper-meta::before{content:"";width:5px;height:5px;flex:none;margin-right:9px;border:1px solid #80aaa1;transform:rotate(45deg);pointer-events:none}
+.atlas-journal .paper-actions>a>span,.atlas-journal .aj-scholar-link>span{transition:transform .2s}
+.atlas-journal .paper-actions>a:hover>span,.atlas-journal .paper-actions>a:focus-visible>span,.atlas-journal .aj-scholar-link:hover>span{transform:translate(2px,-2px)}
+.atlas-journal .aj-logbook{position:relative;isolation:isolate;overflow:hidden;background:linear-gradient(140deg,#eef4ee,#f3f5ed 65%,#eaf2eb)}
+.atlas-journal .aj-logbook::before{content:"";position:absolute;width:480px;height:480px;right:-245px;top:-120px;border-radius:50%;border:1px solid #bed2c44a;box-shadow:0 0 0 36px #bfd5c722,0 0 0 37px #c1d5c34d,0 0 0 76px #c6d9ca15,0 0 0 77px #c1d5c33d;transform:translateY(calc(var(--deck-travel,0)*18px));transition:transform .18s linear;pointer-events:none;z-index:-1}
+.atlas-journal .aj-log-pose{transform:translateY(calc(var(--deck-travel,0)*12px)) rotate(calc(12deg + var(--deck-travel,0)*18deg));transition:transform .18s linear;filter:drop-shadow(0 4px 6px #12384508)}
+.atlas-journal .aj-timeline{position:relative;border-left-color:#c9dcd2}
+.atlas-journal .aj-timeline::after{content:"";position:absolute;left:-1px;top:5px;bottom:24px;width:2px;background:linear-gradient(180deg,#3f8c87,#8ab5a0);transform:scaleY(var(--timeline-progress,1));transform-origin:top;transition:transform .22s ease-out;pointer-events:none}
+.atlas-journal .aj-timeline li::before{z-index:1;background:#e9f1e9;box-shadow:0 0 0 1px #b5cfc2;transition:background .3s,box-shadow .3s}
+.atlas-journal .aj-timeline li.is-on-deck::before{background:#4a9288;box-shadow:0 0 0 1px #8cb4a4,0 0 0 5px #c2d9ca55}
+.atlas-journal .aj-honors ul{gap:18px}
+.atlas-journal .aj-honors li{position:relative;padding:21px 24px 22px 21px;border:1px solid #d5e2d6;border-radius:12px;background:#fafbf6a8;box-shadow:0 5px 14px -10px #30564924;transition:box-shadow .3s,border-color .3s}
+.atlas-journal .aj-honors li::after{content:"";position:absolute;right:15px;top:18px;width:7px;height:7px;border:1px solid #9ebcaa;transform:rotate(45deg);pointer-events:none}
+.atlas-journal .aj-honors li:hover{border-color:#b5cebe;box-shadow:0 10px 23px -16px #30564950}
+.atlas-journal .aj-honors .award-year{color:#3d7f75}
+.deck-enhanced[data-sea-motion=sailing] .atlas-journal .deck-entry{opacity:0;transform:translateY(14px);transition:opacity .5s ease var(--deck-delay,0ms),transform .5s ease var(--deck-delay,0ms),box-shadow .3s,border-color .3s}
+.deck-enhanced[data-sea-motion=sailing] .atlas-journal .deck-entry.is-on-deck{opacity:1;transform:none}
+.atlas-journal .aj-contact{isolation:isolate;border:1px solid #d0e3da;background:linear-gradient(115deg,#e9f2ec 0%,#e2f0e9 48%,#cde3df 100%);box-shadow:0 12px 36px -30px #1238454d}
+.atlas-journal .aj-contact::before{content:"";position:absolute;left:48%;top:-110px;width:830px;height:650px;border-radius:48%;background:repeating-radial-gradient(ellipse at 48% 52%,transparent 0 24px,#86b5ad30 25px 26px,transparent 27px 47px);transform:translateY(calc(var(--deck-travel,0)*16px)) rotate(-12deg);transition:transform .18s linear;pointer-events:none;z-index:-1}
+.atlas-journal .aj-contact::after{content:"";position:absolute;inset:auto 0 0;height:105px;background:linear-gradient(0deg,#b7d7d131,transparent);pointer-events:none;z-index:-1}
+.atlas-journal .aj-contact-art>img{transform:translateY(calc(var(--deck-travel,0)*12px));transition:transform .18s linear;filter:drop-shadow(0 14px 12px #335e5514)}
+.atlas-journal .aj-contact-orbit{border-color:#92bfb2aa;transform:rotate(calc(-24deg + var(--deck-travel,0)*9deg));transition:transform .2s linear;background:radial-gradient(ellipse,#f6faf03d,transparent 65%)}
+.atlas-journal .aj-contact-orbit::after{border-color:#a7cdbda8}
+.atlas-journal .aj-contact-email{position:relative;text-decoration-color:#76aaa1;transition:color .2s}
+.atlas-journal .aj-contact-email>span{transition:transform .2s}
+.atlas-journal .aj-contact-email:hover>span,.atlas-journal .aj-contact-email:focus-visible>span{transform:translate(3px,-3px)}
+/* The chart's four destinations remain reachable without a floating panel over text. */
+.deck-rail{display:none;position:fixed;right:24px;top:50%;width:44px;transform:translateY(-50%);z-index:25;flex-direction:column;align-items:center;gap:18px;font-family:var(--sans)}
+.deck-rail-title{position:absolute;left:-18px;top:-34px;width:80px;text-align:center;font-size:6px;line-height:1.4;letter-spacing:1.8px;color:#8aa09f;white-space:nowrap}
+.deck-rail-track{position:absolute;left:21px;top:22px;bottom:22px;width:1px;background:#d7e4dc;pointer-events:none}
+.deck-rail-progress{position:absolute;inset:0;background:#6b9d93;transform:scaleY(var(--deck-overall,0));transform-origin:top;transition:transform .18s linear;pointer-events:none}
+.deck-stop{position:relative;display:flex;align-items:center;justify-content:center;flex:none;width:44px;height:44px;color:#7e9994;text-decoration:none;outline-offset:2px}
+.deck-stop-number{display:flex;align-items:center;justify-content:center;width:27px;height:27px;border:1px solid #d0e0d6;border-radius:50%;background:var(--paper);font:500 8px/1 var(--sans);box-shadow:0 0 0 4px var(--paper);transition:background .2s,border-color .2s,color .2s,box-shadow .2s}
+.deck-stop:hover .deck-stop-number,.deck-stop:focus-visible .deck-stop-number{border-color:#8db3a6;color:var(--sea)}
+.deck-stop.is-current .deck-stop-number,.deck-stop[aria-current=location] .deck-stop-number{border-color:#2e6e6f;background:#2e6e6f;color:#fff;box-shadow:0 0 0 4px var(--paper),0 0 0 5px #bdd4c9}
+.deck-stop-label{position:absolute;right:46px;top:9px;padding:5px 9px;border:1px solid #d9e5dc;border-radius:5px;background:#fafbf6f7;box-shadow:0 5px 16px #12384508;color:#426c68;font-size:8px;line-height:1.7;white-space:nowrap;opacity:0;transform:translateX(5px);transition:opacity .18s,transform .18s;pointer-events:none}
+.deck-stop:hover .deck-stop-label,.deck-stop:focus-visible .deck-stop-label{opacity:1;transform:none}
+.deck-motion-toggle{display:none;position:fixed;right:22px;bottom:22px;z-index:30;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:10px 14px;border:1px solid #c7dbd2;border-radius:24px;background:#fafbf6ee;color:#426e69;box-shadow:0 5px 22px #1238450c;backdrop-filter:blur(12px);font:500 9px/1.6 var(--sans);cursor:pointer;transition:background .2s,border-color .2s,bottom .2s}
+.deck-motion-toggle svg{width:16px;height:16px;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;fill:none}
+.deck-motion-toggle:hover{background:#fffdf7;border-color:#97bdb0}
+html.deck-away .deck-motion-toggle{display:inline-flex}
+html.deck-at-end .deck-motion-toggle{bottom:84px}
+html[data-cinema=open] .deck-rail,html[data-cinema=open] .deck-motion-toggle{display:none}
+@media(min-width:1350px){html.deck-away:not([data-cinema=open]) .deck-rail{display:flex}}
+@media(min-width:1800px){.deck-rail{right:calc((100vw - 1650px)/2)}}
+@media(max-width:800px){
+  .atlas-journal .aj-profile::before{left:-11px;top:-20px;width:calc(100% + 28px);box-shadow:0 0 0 9px #d7e4dc20,0 0 0 10px #c3d8ce55}
+  .atlas-journal .aj-profile::after{right:-14px;top:16px;width:18px;height:18px;box-shadow:inset 0 0 0 5px var(--paper),inset 0 0 0 6px #91b4a8}
+  .atlas-journal .aj-honors ul{gap:12px}
+  .atlas-journal .aj-honors li{padding:17px 21px 18px 16px}
+  .atlas-journal .aj-logbook::before{width:350px;height:350px;right:-230px}
+}
+@media(max-width:560px){
+  .atlas-journal .aj-profile{margin-top:10px}
+  .atlas-journal .aj-portrait::before{border-radius:13px;inset:5px -5px -6px 5px}
+  .atlas-journal .aj-about-copy h2::after{margin-top:18px;width:34px}
+  .atlas-journal .aj-news-list>div,.atlas-journal .aj-news-older>div{padding-block:10px}
+  .atlas-journal .aj-news-list>div::before,.atlas-journal .aj-news-older>div::before{left:-9px;top:18px;width:3px;height:3px}
+  .atlas-journal .aj-paper-number{font-size:20px}
+  .atlas-journal .aj-research-vignette{transform:translateY(calc(var(--deck-travel,0)*6px))}
+  .atlas-journal .aj-honors li{padding:18px 24px 18px 16px;gap:8px}
+  .atlas-journal .aj-honors li::after{right:12px;top:15px;width:5px;height:5px}
+  .atlas-journal .aj-contact::before{left:18%;top:90px;width:540px;height:590px;opacity:.7}
+  .atlas-journal .aj-contact-art>img{transform:translateY(calc(var(--deck-travel,0)*5px - 6px))}
+  .deck-motion-toggle{right:16px;bottom:18px;font-size:8px;padding:10px 13px;gap:7px}
+  html.deck-at-end .deck-motion-toggle{bottom:84px}
+}
+html[data-sea-motion=paused] .atlas-journal .aj-profile::before,html[data-sea-motion=paused] .atlas-journal .aj-profile::after,html[data-sea-motion=paused] .atlas-journal .aj-research-vignette,html[data-sea-motion=paused] .atlas-journal .aj-log-pose,html[data-sea-motion=paused] .atlas-journal .aj-logbook::before,html[data-sea-motion=paused] .atlas-journal .aj-contact::before,html[data-sea-motion=paused] .atlas-journal .aj-contact-art>img,html[data-sea-motion=paused] .atlas-journal .aj-contact-orbit,html[data-sea-motion=paused] .atlas-journal .paper.is-revealed[data-tilt]{transform:none;transition:none}
+html[data-sea-motion=paused] .atlas-journal .aj-timeline::after,html[data-sea-motion=paused] .atlas-journal .aj-about-copy h2::after,html[data-sea-motion=paused] .atlas-journal .aj-research-toolbar::after{transform:none;transition:none}
+html[data-sea-motion=paused] .atlas-journal .deck-entry{opacity:1;transform:none;transition:none}
+@media(prefers-reduced-motion:reduce){
+  .atlas-journal .aj-profile::before,.atlas-journal .aj-profile::after,.atlas-journal .aj-research-vignette,.atlas-journal .aj-log-pose,.atlas-journal .aj-logbook::before,.atlas-journal .aj-contact::before,.atlas-journal .aj-contact-art>img,.atlas-journal .aj-contact-orbit,.voyage-enhanced .atlas-journal .paper.is-revealed[data-tilt],.atlas-journal .aj-timeline::after,.atlas-journal .aj-about-copy h2::after,.atlas-journal .aj-research-toolbar::after{transform:none;transition:none}
+  .deck-enhanced[data-sea-motion=sailing] .atlas-journal .deck-entry{opacity:1;transform:none;transition:none}
+  .atlas-journal .paper,.atlas-journal .paper::after,.atlas-journal .aj-social-links a::after,.atlas-journal .aj-news-list>div,.atlas-journal .aj-news-list>div::before,.atlas-journal .aj-news-older>div,.atlas-journal .aj-news-older>div::before,.atlas-journal .paper-actions>a>span,.atlas-journal .aj-scholar-link>span,.atlas-journal .aj-timeline li::before,.atlas-journal .aj-honors li,.atlas-journal .aj-contact-email,.atlas-journal .aj-contact-email>span,.deck-rail-progress,.deck-stop-number,.deck-stop-label,.deck-motion-toggle{transition:none}
+}
+/* A small chart bridges the open sea and the written journal. */
+.voyage-chart{margin:32px 0 0;isolation:isolate}.chart-caption{display:flex;justify-content:space-between;align-items:center;gap:20px;padding:0 3px 15px;font:400 17px/1.4 var(--serif);color:#426b70}.chart-caption-note{font:500 7px/1.5 var(--sans);letter-spacing:2px;color:#8ca39d}.chart-map{display:block;width:100%;height:auto;overflow:visible}.chart-port-dot,.chart-port-number,.chart-port-halo{transition:fill .25s,stroke .25s}.chart-port.is-current .chart-port-dot{fill:#2b7b80;stroke:#2b7b80}.chart-port.is-current .chart-port-number{fill:#fffdf3}.chart-port.is-current .chart-port-halo{fill:#b2d7ce;fill-opacity:.5}.chart-ship-icon{filter:drop-shadow(0 2px 2px #244e4822)}.chart-mobile-key{display:none}
+@media(max-width:560px){.voyage-chart{margin-top:22px;padding:18px 12px 15px;background:#eef4ec;border:1px solid #dce8dd;border-radius:13px}.chart-caption{padding:0 1px 10px;font-size:16px}.chart-caption-note,.chart-port-name,.chart-compass{display:none}.chart-port-number{font-size:18px}.chart-port-dot{r:17px}.chart-port-halo{r:25px}.chart-ship-icon{transform:scale(1.7)}.chart-mobile-key{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-top:12px;font-size:8px;color:#67857d;text-align:center;white-space:nowrap}}
+html[data-sea-motion=paused] .chart-port-dot,html[data-sea-motion=paused] .chart-port-number,html[data-sea-motion=paused] .chart-port-halo{transition:none}
+@media(prefers-reduced-motion:reduce){.chart-port-dot,.chart-port-number,.chart-port-halo{transition:none}}

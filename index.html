@@ -17,10 +17,13 @@
   <link rel="stylesheet" href="atlas.css?v=20261019">
   <link rel="stylesheet" href="journal.css?v=20261019">
   <link rel="stylesheet" href="cinema.css?v=20261020">
+  <link rel="stylesheet" href="belowdeck.css?v=20261018-r3">
+  <link rel="stylesheet" href="memories.css?v=20261018-r3">
   <script src="script.js" defer></script>
   <script src="voyage-motion.js" defer></script>
   <script src="ocean-scene.js?v=20261020" defer></script>
   <script src="cinema-controls.js?v=20261020" defer></script>
+  <script src="belowdeck.js?v=20261018-r3" defer></script>
   <noscript><style>.ocean-controls,.menu-toggle,.aj-research-toolbar{display:none!important}.nav-links{display:flex!important;position:static!important;flex-wrap:wrap}.nav-shell{height:auto;min-height:76px;flex-wrap:wrap;padding-block:16px}.atlas-journal [data-reveal]{opacity:1;transform:none}</style></noscript>
 </head>
 <body class="atlas-site">
@@ -56,6 +59,63 @@
     <section class="port-nav" aria-label="Your next destination">
       <div class="port-heading"><img src="assets/log-pose.svg" alt="" width="45" height="45"><div><span>FOLLOW YOUR LOG POSE</span><p>Your next destination</p></div><span id="quest-progress" class="port-progress" aria-live="polite">0 / 3 ports visited</span></div>
       <div class="ports"><a class="mission" href="#about" data-mission="about"><span class="port-number">01</span><span><small>EAST BLUE</small><strong>A little about me</strong></span><span class="mission-state" aria-label="Not yet visited">↗</span></a><a class="mission" href="#research" data-mission="research"><span class="port-number">02</span><span><small>THE GRAND LINE</small><strong>Islands of discovery</strong></span><span class="mission-state" aria-label="Not yet visited">↗</span></a><a class="mission" href="#contact" data-mission="contact"><span class="port-number">03</span><span><small>THE NEW WORLD</small><strong>Meet a new nakama</strong></span><span class="mission-state" aria-label="Not yet visited">↗</span></a></div>
+      <figure class="voyage-chart" role="img" aria-label="Charting the voyage: About, Research, Logbook and Contact.">
+  <figcaption class="chart-caption"><span>A curiosity-led voyage</span><span class="chart-caption-note" aria-hidden="true">FOUR PORTS · ONE OPEN HORIZON</span></figcaption>
+  <svg class="chart-map" viewBox="0 0 1160 190" width="1160" height="190" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="chart-water" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f5f6ed"/><stop offset="1" stop-color="#e7f1ec"/></linearGradient>
+      <pattern id="chart-grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M40 0H0V40" fill="none" stroke="#568c8d" stroke-opacity=".075" stroke-width=".75"/></pattern>
+    </defs>
+    <rect width="1160" height="190" rx="17" fill="url(#chart-water)"/>
+    <rect x="1" y="1" width="1158" height="188" rx="16" fill="url(#chart-grid)" stroke="#d9e5de" stroke-width="1"/>
+    <g class="chart-soundings" fill="none" stroke="#a6c6bf" stroke-width=".9" opacity=".48">
+      <path d="M27 127C68 58 126 40 174 59S231 110 271 81M29 140C69 75 127 56 172 71S231 121 276 94"/>
+      <path d="M314 50C360 1 444 8 482 48S493 107 553 122M322 59C365 15 438 18 474 55S493 116 550 133"/>
+      <path d="M590 143C617 95 645 63 704 68S777 117 807 111M597 155C630 101 651 77 701 80S771 128 813 124"/>
+      <path d="M883 86C911 46 956 8 1018 20S1087 54 1113 44M891 99C916 60 959 21 1015 32S1083 67 1118 58"/>
+    </g>
+    <g class="chart-current-lines" fill="none" stroke="#94bcb6" stroke-width="1" opacity=".45" stroke-linecap="round">
+      <path d="M232 147q7-5 14 0t14 0m-21 8q7-5 14 0M554 48q7-5 14 0t14 0m-21 8q7-5 14 0M862 146q7-5 14 0t14 0m-21 8q7-5 14 0"/>
+    </g>
+    <g class="chart-islands" stroke-linejoin="round">
+      <g transform="translate(130 101)">
+        <path d="M-37-12C-34-29-12-36 4-28S33-25 39-9 30 13 15 23-7 28-24 19-42 4-37-12Z" fill="#e0ebdf" stroke="#b0c8b9"/>
+        <path d="M-24-12C-19-22-4-25 8-18S26-16 27-6 19 6 10 13-5 17-17 11-30-2-24-12Z" fill="none" stroke="#bed2c0"/>
+      </g>
+      <g transform="translate(410 72)">
+        <path d="M-34-9C-28-24-13-32 0-25S12-31 29-19 40 1 29 12 9 19-6 25-20 13-32 8-40 1-34-9Z" fill="#d8e8df" stroke="#a4c2b4"/>
+        <path d="M-23-7C-17-17-8-22 2-17S15-20 23-12 28 1 19 7 7 12-3 15-15 8-22 3-27-2-23-7Z" fill="none" stroke="#b4cebd"/>
+      </g>
+      <g transform="translate(720 118)">
+        <path d="M-39-8C-32-22-15-21-6-28S17-27 26-16 42-6 36 8 21 18 9 25-7 15-20 20-44 5-39-8Z" fill="#e3ead9" stroke="#b3c7ad"/>
+        <path d="M-27-6C-20-14-9-13-2-20S13-18 18-10 28-4 25 5 13 10 5 16-5 9-13 12-30 3-27-6Z" fill="none" stroke="#c5d3b8"/>
+      </g>
+      <g transform="translate(1030 72)">
+        <path d="M-33-17C-20-29-8-29 3-23S28-27 36-12 31 6 24 17 4 17-7 24-22 14-31 8-45-5-33-17Z" fill="#dce9dc" stroke="#abc6b4"/>
+        <path d="M-23-11C-14-19-5-20 4-16S19-18 24-9 20 4 14 9 4 10-5 15-13 9-21 4-29-4-23-11Z" fill="none" stroke="#bed2bd"/>
+      </g>
+    </g>
+    <path id="chart-course" d="M88 130C97 112 111 102 130 101C212 98 274 18 410 72S571 165 720 118S912 12 1030 72C1051 83 1068 87 1088 86" fill="none" stroke="#88b2ae" stroke-width="1.5" stroke-dasharray="3 7" stroke-linecap="round"/>
+    <path id="chart-ink" d="M88 130C97 112 111 102 130 101C212 98 274 18 410 72S571 165 720 118S912 12 1030 72C1051 83 1068 87 1088 86" pathLength="1" fill="none" stroke="#287d85" stroke-width="2" stroke-dasharray="1" stroke-dashoffset="1" stroke-linecap="round"/>
+    <g class="chart-port" data-chart-port="about" transform="translate(130 101)"><circle class="chart-port-halo" r="17" fill="#faf9f5" fill-opacity=".55"/><circle class="chart-port-dot" r="11" fill="#faf9f5" stroke="#7ca8a2" stroke-width="1.2"/><text class="chart-port-number" text-anchor="middle" y="3" fill="#285e68" font-family="var(--sans, sans-serif)" font-size="9" font-weight="500">01</text><text class="chart-port-name" text-anchor="middle" y="52" fill="#456e72" font-family="var(--sans, sans-serif)" font-size="10" letter-spacing="1.8">ABOUT</text></g>
+    <g class="chart-port" data-chart-port="research" transform="translate(410 72)"><circle class="chart-port-halo" r="17" fill="#faf9f5" fill-opacity=".55"/><circle class="chart-port-dot" r="11" fill="#faf9f5" stroke="#7ca8a2" stroke-width="1.2"/><text class="chart-port-number" text-anchor="middle" y="3" fill="#285e68" font-family="var(--sans, sans-serif)" font-size="9" font-weight="500">02</text><text class="chart-port-name" text-anchor="middle" y="52" fill="#456e72" font-family="var(--sans, sans-serif)" font-size="10" letter-spacing="1.8">RESEARCH</text></g>
+    <g class="chart-port" data-chart-port="logbook" transform="translate(720 118)"><circle class="chart-port-halo" r="17" fill="#faf9f5" fill-opacity=".55"/><circle class="chart-port-dot" r="11" fill="#faf9f5" stroke="#7ca8a2" stroke-width="1.2"/><text class="chart-port-number" text-anchor="middle" y="3" fill="#285e68" font-family="var(--sans, sans-serif)" font-size="9" font-weight="500">03</text><text class="chart-port-name" text-anchor="middle" y="48" fill="#456e72" font-family="var(--sans, sans-serif)" font-size="10" letter-spacing="1.8">LOGBOOK</text></g>
+    <g class="chart-port" data-chart-port="contact" transform="translate(1030 72)"><circle class="chart-port-halo" r="17" fill="#faf9f5" fill-opacity=".55"/><circle class="chart-port-dot" r="11" fill="#faf9f5" stroke="#7ca8a2" stroke-width="1.2"/><text class="chart-port-number" text-anchor="middle" y="3" fill="#285e68" font-family="var(--sans, sans-serif)" font-size="9" font-weight="500">04</text><text class="chart-port-name" text-anchor="middle" y="52" fill="#456e72" font-family="var(--sans, sans-serif)" font-size="10" letter-spacing="1.8">CONTACT</text></g>
+    <g class="chart-compass" transform="translate(1113 145)" fill="none" stroke="#67928f" opacity=".68"><circle r="17" stroke-width=".8"/><circle r="12" stroke-width=".65"/><path d="M0-23V23M-23 0H23" stroke-width=".7"/><path d="M0-18 3-3 18 0 3 3 0 18-3 3-18 0-3-3Z" stroke-width=".8"/><path d="M0-18 3-3 0 0Z" fill="#67928f" stroke="none"/><text y="-29" text-anchor="middle" fill="#67928f" stroke="none" font-family="var(--sans, sans-serif)" font-size="8" letter-spacing="1">N</text></g>
+    <g class="chart-endpoints" fill="#86aaa3"><circle cx="88" cy="130" r="2.3"/><circle cx="1088" cy="86" r="2.3"/></g>
+    <g id="chart-ship" transform="translate(88 130) rotate(-63.4)">
+      <g class="chart-ship-icon" stroke-linejoin="round" stroke-linecap="round">
+        <ellipse cy="2" rx="17" ry="7" fill="#8cb9b2" fill-opacity=".28"/>
+        <path d="M-13-5Q1-8 15 0Q1 8-13 5Z" fill="#fcf8e7" stroke="#376c74" stroke-width="1.3"/>
+        <path d="M-10 2H7" fill="none" stroke="#caa971" stroke-width="1.4"/>
+        <path d="M-1-10V7" fill="none" stroke="#376c74" stroke-width="1.1"/>
+        <path d="M-1-9 10-1H-1Z" fill="#fffdf5" stroke="#56858a" stroke-width=".9"/>
+        <path d="M-1-9-7-8-1-5Z" fill="#c87350"/>
+      </g>
+    </g>
+  </svg>
+  <div class="chart-mobile-key" aria-hidden="true"><span>01 About</span><span>02 Research</span><span>03 Logbook</span><span>04 Contact</span></div>
+</figure>
     </section>
     <div class="atlas-journal">
   <section id="about" class="aj-about aj-container" aria-labelledby="about-title" data-reveal>
@@ -80,35 +140,35 @@
     <div class="aj-section-heading" data-reveal><div><p class="aj-kicker">02 / THE GRAND LINE</p><h2 id="research-title">Islands of discovery.</h2><p class="aj-section-intro">Different perspectives. A shared pursuit of 3D understanding.</p></div><img class="aj-research-vignette" src="assets/robin-chopper.webp" alt="Nico Robin and Chopper studying a nautical map together" width="768" height="512" loading="lazy"></div>
     <div class="aj-research-toolbar"><div class="filters" role="group" aria-label="Filter research by topic"><button type="button" class="is-active" data-filter="all" aria-pressed="true">All work <span>05</span></button><button type="button" data-filter="reconstruction" aria-pressed="false">3D Reconstruction</button><button type="button" data-filter="synthesis" aria-pressed="false">View Synthesis</button><button type="button" data-filter="localization" aria-pressed="false">Localization</button><button type="button" data-filter="interaction" aria-pressed="false">Hand–Object</button></div><span id="result-count" aria-live="polite" aria-atomic="true">5 projects</span></div>
     <div class="aj-papers">
-      <article class="paper aj-featured" data-topics="reconstruction interaction" aria-labelledby="project-01" data-reveal>
+      <article class="paper aj-featured" data-tilt data-topics="reconstruction interaction" aria-labelledby="project-01" data-reveal>
         <figure class="aj-paper-image"><img src='assets/fig_stereohoi.jpg' alt='StereoHOI framework figure' loading='lazy' width="640" height="360"><figcaption><span>Metric hand–object reconstruction</span><span class="aj-paper-number" aria-hidden="true">01</span></figcaption></figure>
         <div class="aj-paper-copy"><div class="aj-paper-meta"><span class="aj-venue aj-under-review">UNDER REVIEW</span></div>
           <h3 id="project-01">StereoHOI: Recover Metric Hand-Object Interaction from Egocentric Stereo Vision</h3><p class="authors"><b>Qiwei Wang</b>, Xiangting Meng, Xingxing Zuo, <a href='https://yujiaoshi.github.io/'>Yujiao Shi</a></p>
           <div class="paper-actions"><details><summary>Abstract <span aria-hidden="true">+</span></summary><p>Recovers metric-scale 3D hand-object interaction from egocentric stereo images: fuses frozen hand-foundation-model priors with camera parameters, models stereo disparity via alternating cross-view attention, and predicts metric wrist translation and pose residuals, placing hand and object meshes in one metric frame.</p></details></div>
         </div>
       </article>
-      <article class="paper" data-topics="reconstruction" aria-labelledby="project-02" data-reveal>
+      <article class="paper" data-tilt data-topics="reconstruction" aria-labelledby="project-02" data-reveal>
         <figure class="aj-paper-image"><img src='assets/fig_cross3r.jpg' alt='Seeing Across Skies and Streets teaser figure' loading='lazy' width="640" height="360"><figcaption><span>Satellite · drone · ground</span><span class="aj-paper-number" aria-hidden="true">02</span></figcaption></figure>
         <div class="aj-paper-copy"><div class="aj-paper-meta"><span class="aj-venue">NEURIPS 2026</span></div>
           <h3 id="project-02">Seeing Across Skies and Streets: Feedforward 3D Reconstruction from Satellite, Drone, and Ground Images</h3><p class="authors"><b>Qiwei Wang</b>, Zhongyao Tuo, Xianghui Ze, <a href='https://yujiaoshi.github.io/'>Yujiao Shi</a></p>
           <div class="paper-actions"><a href='https://arxiv.org/pdf/2605.07978'>Paper <span aria-hidden='true'>↗</span></a> <a href='https://github.com/eacsai/PI3_Sat'>Code <span aria-hidden='true'>↗</span></a><details><summary>Abstract <span aria-hidden="true">+</span></summary><p>Cross3R, a feedforward model that jointly processes satellite, drone, and ground images to directly regress full 3D structure and 6-DoF poses, beyond prior planar position and yaw estimation; also builds CrossGeo (85 locations worldwide, 278K images) and outperforms specialized methods zero-shot on KITTI.</p></details></div>
         </div>
       </article>
-      <article class="paper" data-topics="synthesis reconstruction" aria-labelledby="project-03" data-reveal>
+      <article class="paper" data-tilt data-topics="synthesis reconstruction" aria-labelledby="project-03" data-reveal>
         <figure class="aj-paper-image"><img src='assets/fig_cylindersplat.jpg' alt='CylinderSplat teaser figure' loading='lazy' width="640" height="360"><figcaption><span>Panoramic novel view synthesis</span><span class="aj-paper-number" aria-hidden="true">03</span></figcaption></figure>
         <div class="aj-paper-copy"><div class="aj-paper-meta"><span class="aj-venue">ICLR 2026</span></div>
           <h3 id="project-03">CylinderSplat: 3D Gaussian Splatting with Cylindrical Triplanes for Panoramic Novel View Synthesis</h3><p class="authors"><b>Qiwei Wang</b>, Xianghui Ze, Jingyi Yu, <a href='https://yujiaoshi.github.io/'>Yujiao Shi</a></p>
           <div class="paper-actions"><a href='https://openreview.net/forum?id=lEzkct87Uy'>Paper <span aria-hidden='true'>↗</span></a> <a href='https://github.com/wangqww/CylinderSplat'>Code <span aria-hidden='true'>↗</span></a><details><summary>Abstract <span aria-hidden="true">+</span></summary><p>A feedforward 3D Gaussian Splatting framework that tackles the distortion and occlusion of equirectangular panoramas with a cylindrical triplane representation, decoupling azimuth and elevation to improve geometric consistency; achieves SOTA on single- and multi-view panoramic novel view synthesis.</p></details></div>
         </div>
       </article>
-      <article class="paper" data-topics="localization" aria-labelledby="project-04" data-reveal>
+      <article class="paper" data-tilt data-topics="localization" aria-labelledby="project-04" data-reveal>
         <figure class="aj-paper-image"><img src='assets/fig_bevsplat.jpg' alt='BevSplat teaser figure' loading='lazy' width="640" height="360"><figcaption><span>Weakly supervised cross-view localization</span><span class="aj-paper-number" aria-hidden="true">04</span></figcaption></figure>
         <div class="aj-paper-copy"><div class="aj-paper-meta"><span class="aj-venue">NEURIPS 2025 · SPOTLIGHT</span></div>
           <h3 id="project-04">BevSplat: Resolving Height Ambiguity via Feature-Based Gaussian Primitives for Weakly-Supervised Cross-View Localization</h3><p class="authors"><b>Qiwei Wang</b>, Shaoxun Wu, <a href='https://yujiaoshi.github.io/'>Yujiao Shi</a></p>
           <div class="paper-actions"><a href='https://arxiv.org/pdf/2502.09080'>Paper <span aria-hidden='true'>↗</span></a> <a href='https://github.com/wangqww/BevSplat'>Code <span aria-hidden='true'>↗</span></a><details><summary>Abstract <span aria-hidden="true">+</span></summary><p>Weakly supervised cross-view localization that resolves ground-satellite height ambiguity: feature-based 3D Gaussian Splatting synthesizes geometrically consistent BEV features from ground images, aligned with satellite features to solve for pose; significantly outperforms prior weakly supervised methods on KITTI and VIGOR.</p></details></div>
         </div>
       </article>
-      <article class="paper" data-topics="synthesis" aria-labelledby="project-05" data-reveal>
+      <article class="paper" data-tilt data-topics="synthesis" aria-labelledby="project-05" data-reveal>
         <figure class="aj-paper-image"><img src='assets/fig_sat2street.jpg' alt='Controllable Satellite-to-Street-View Synthesis with Precise Pose Alignment and Zero-Shot Environmental Control teaser figure' loading='lazy' width="640" height="360"><figcaption><span>Controllable cross-view synthesis</span><span class="aj-paper-number" aria-hidden="true">05</span></figcaption></figure>
         <div class="aj-paper-copy"><div class="aj-paper-meta"><span class="aj-venue">ICLR 2025</span></div>
           <h3 id="project-05">Controllable Satellite-to-Street-View Synthesis with Precise Pose Alignment and Zero-Shot Environmental Control</h3><p class="authors">Xianghui Ze, Zhenbo Song, <b>Qiwei Wang</b>, Jianfeng Lu, <a href='https://yujiaoshi.github.io/'>Yujiao Shi</a></p>
@@ -118,6 +178,28 @@
     </div>
     <a class="aj-scholar-link" href="https://scholar.google.com.hk/citations?user=V61LSk0AAAAJ&amp;hl=zh-CN">More on Google Scholar <span aria-hidden="true">↗</span></a>
   </section>
+<section id="memories" class="op-memories aj-container" aria-labelledby="memories-title">
+  <div class="op-memories-heading" data-reveal>
+    <div><p class="op-memories-kicker">POSTCARDS FROM THE GRAND LINE</p><h2 id="memories-title">Some things are worth sailing for.</h2><p class="op-memories-intro">A few moments to carry on the journey.</p></div>
+    <svg class="op-strawhat-charm" viewBox="0 0 120 140" aria-hidden="true" focusable="false"><path d="M72 2C71 13 62 20 63 34" fill="none" stroke="#adab8e" stroke-width="1.3"/><circle cx="63" cy="35" r="4" fill="none" stroke="#a78e58" stroke-width="1.6"/><g transform="rotate(12 60 80)"><ellipse cx="60" cy="93" rx="46" ry="13" fill="#e8c87d" stroke="#8b754c" stroke-width="1.3"/><ellipse cx="60" cy="92" rx="40" ry="8" fill="none" stroke="#b89a5c" stroke-width=".8"/><path d="M33 88C34 62 41 48 59 48C79 48 87 61 88 88Q61 101 33 88Z" fill="#efd392" stroke="#8b754c" stroke-width="1.3"/><path d="M35 78Q60 90 86 78L88 87Q60 101 33 88Z" fill="#b95743" stroke="#8b5541" stroke-width="1"/><g fill="none" stroke="#b6985c" stroke-width=".7" opacity=".7"><path d="M44 54Q41 67 42 79M52 49Q49 65 50 82M63 49V84M72 51Q76 64 76 82M36 68Q60 78 85 68M40 58Q59 66 81 58M23 93L26 99M32 96L34 103M43 99L44 105M77 100L76 106M88 98L87 104M98 93L96 100"/></g></g></svg>
+  </div>
+  <div class="op-memory-grid">
+    <figure class="op-memory-card" data-reveal data-tilt>
+      <div class="op-memory-image"><img src="assets/memory-promise.webp" alt="Shanks placing his straw hat on young Luffy's head, entrusting him with a promise" width="1536" height="1024" loading="lazy"></div>
+      <figcaption><p class="op-memory-coordinate">01 / A BEGINNING</p><h3>A promise to keep.</h3><p class="op-memory-note">A borrowed hat. A dream big enough to cross an ocean.</p></figcaption>
+    </figure>
+    <figure class="op-memory-card" data-reveal data-tilt>
+      <div class="op-memory-image"><img src="assets/memory-nakama.webp" alt="The Straw Hat crew raising their marked arms toward Vivi as they leave Alabasta" width="1536" height="1024" loading="lazy"></div>
+      <figcaption><p class="op-memory-coordinate">02 / A BOND</p><h3>Friends, across every sea.</h3><p class="op-memory-note">Some goodbyes never change what it means to belong.</p></figcaption>
+    </figure>
+    <figure class="op-memory-card" data-reveal data-tilt>
+      <div class="op-memory-image"><img src="assets/memory-merry.webp" alt="The Straw Hat crew saying farewell to the Going Merry at sea" width="1536" height="1024" loading="lazy"></div>
+      <figcaption><p class="op-memory-coordinate">03 / A THANK YOU</p><h3>Thank you, Merry.</h3><p class="op-memory-note">For every shore you brought us to, and every mile together.</p></figcaption>
+    </figure>
+  </div>
+  <div class="op-memories-footnote"><span class="op-memory-rule" aria-hidden="true"></span><p>The best part of a voyage is who you share it with.</p><svg class="op-vivre-charm" viewBox="0 0 66 83" aria-hidden="true" focusable="false"><path d="M31 1V14" fill="none" stroke="#adb2a0" stroke-width="1.2"/><g transform="rotate(-11 33 45)"><path d="m13 19 10-1 3 1 13-1 3 2 9-1 2 12-1 5 2 12-2 7 1 15-12 2-5-1-14 2-7-3-2-14 2-9-2-12Z" fill="#f5f0dd" stroke="#bdc1ab" stroke-width="1.2"/><path d="M23 30H43M21 35H39M22 59H43" stroke="#c1c5b0" stroke-width="1"/><path d="m31 41-4 7 4 7 5-7Z" fill="none" stroke="#91a99a" stroke-width="1"/><circle cx="32" cy="23" r="1.8" fill="none" stroke="#b2b59b"/></g></svg></div>
+</section>
+
   <section id="logbook" class="aj-logbook" aria-labelledby="logbook-title"><div class="aj-container">
     <div class="aj-section-heading" data-reveal><div><p class="aj-kicker">03 / PORTS ALONG THE WAY</p><h2 id="logbook-title">A voyage in progress.</h2></div><img class="aj-log-pose" src="assets/log-pose.svg" alt="" width="64" height="64"></div>
     <div class="aj-journey-grid" data-reveal><div id="edu"><h3 class="aj-column-title">Education</h3><ol class="aj-timeline"><li><time>SEP 2024 — MAY 2027</time><h4>ShanghaiTech University</h4><p>M.S. in Information and Communication Engineering</p><span>Shanghai, China</span></li><li><time>SEP 2018 — MAY 2022</time><h4>Harbin Institute of Technology</h4><p>B.Eng. in Measurement &amp; Control Technology and Instrumentation</p><span>Harbin, China</span></li></ol></div><div id="exp"><h3 class="aj-column-title">Experience</h3><ol class="aj-timeline"><li><time>JUN 2022 — MAY 2023</time><h4>ByteDance</h4><p>Web Front-End Development Engineer</p><span>Shanghai, China</span></li><li><time>JUN 2021 — MAY 2022</time><h4>Meituan</h4><p>Web Front-End Development Engineer · Intern</p><span>Beijing, China</span></li></ol></div></div>
