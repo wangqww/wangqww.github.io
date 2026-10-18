@@ -13,6 +13,7 @@
   let frame = 0, request = 0, previous = 0, elapsed = 0, lastPaint = 0, lost = false, inView = true;
   let width = 1, height = 1, mobile = false, scrollTarget = 0, scroll = 0;
   let px = 0, py = 0, tx = 0, ty = 0;
+  let cinemaStarted = 0, cinemaOpen = false, drag = null;
   const reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
   const matrix = {
     multiply(a, b) {
@@ -60,21 +61,33 @@
   }
 
   // Mesh positions are world-space, so the horizon and waves respond to the camera.
-  let sky, sea, boat, oceanMesh, hullMesh, sailMesh, rearMesh, faceMesh, flagTexture, faceTexture, skyBuffer;
+  let sky, sea, boat, spray, birds, oceanMesh, hullMesh, sailMesh, rearMesh, faceMesh, flagTexture, faceTexture, skyBuffer, sprayBuffer, birdBuffer;
   try {
     sky = program("attribute vec2 aPosition;varying vec2 vUv;void main(){vUv=aPosition*.5+.5;gl_Position=vec4(aPosition,0.,1.);}", `
-      varying vec2 vUv;uniform float uTime;uniform float uAspect;
-      float cloud(vec2 p){return sin(p.x*2.3+sin(p.y*4.))*sin(p.y*7.+p.x*.7);}
+      varying vec2 vUv;uniform float uTime;uniform float uAspect;uniform vec2 uView;
+      float hash(vec2 p){vec3 q=fract(vec3(p.xyx)*.1031);q+=dot(q,q.yzx+33.33);return fract((q.x+q.y)*q.z);}
+      float noise(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(hash(i),hash(i+vec2(1.,0.)),f.x),mix(hash(i+vec2(0.,1.)),hash(i+vec2(1.,1.)),f.x),f.y);}
       void main(){
-        vec3 horizon=vec3(.84,.94,.94), upper=vec3(.59,.81,.88);
-        vec3 color=mix(horizon,upper,smoothstep(.36,1.,vUv.y));
-        vec2 sun=vUv-vec2(.82,.79);sun.x*=uAspect;
-        float d=length(sun);color=mix(color,vec3(1.,.96,.83),exp(-d*9.)*.20);
-        color=mix(color,vec3(1.,.98,.87),(1.-smoothstep(.017,.020,d))*.75);
-        float c=smoothstep(.4,.8,cloud(vec2(vUv.x*5.+uTime*.006,vUv.y*3.)))*smoothstep(.45,.7,vUv.y);
-        color=mix(color,vec3(.98,.98,.93),c*.22);
+        vec2 uv=vUv+uView;
+        vec3 horizon=vec3(.85,.94,.93),upper=vec3(.44,.72,.86);
+        vec3 color=mix(horizon,upper,smoothstep(.30,1.,uv.y));
+        vec2 sun=uv-vec2(.82,.79);sun.x*=uAspect;
+        float d=length(sun);
+        color=mix(color,vec3(1.,.95,.80),exp(-d*7.)*.30);
+        color+=vec3(.10,.075,.035)*exp(-d*d*95.);
+        color=mix(color,vec3(1.,.98,.88),(1.-smoothstep(.015,.021,d))*.88);
+        // Soft cloud masses have a broad shape and finer lit edges, drifting at
+        // different speeds. Four noise samples avoid a heavy sky ray march.
+        vec2 p=vec2(uv.x*uAspect*3.1+uTime*.012,uv.y*6.5);
+        float billow=noise(p)*.64+noise(p*2.03+4.8)*.26+noise(p*4.09-8.2)*.10;
+        float body=smoothstep(.49,.72,billow)*smoothstep(.43,.64,uv.y);
+        vec3 cloudColor=mix(vec3(.81,.88,.89),vec3(1.,.99,.94),smoothstep(.50,.68,billow));
+        color=mix(color,cloudColor,body*.82);
+        float wisps=smoothstep(.54,.79,noise(vec2(uv.x*uAspect*2.4-uTime*.006,uv.y*20.)));
+        wisps*=smoothstep(.67,.94,uv.y)*(1.-body)*.17;
+        color=mix(color,vec3(.98,.99,.97),wisps);
         gl_FragColor=vec4(color,1.);
-      }`, ["uTime", "uAspect"]);
+      }`, ["uTime", "uAspect", "uView"]);
     sea = program(`
       precision highp float;attribute vec3 aPosition;uniform mat4 uVP;uniform float uTime;
       varying vec3 vWorld;varying vec3 vNormal;varying float vHeight;
@@ -90,22 +103,57 @@
       }`, `
       varying vec3 vWorld;varying vec3 vNormal;varying float vHeight;
       uniform vec3 uEye;uniform vec2 uResolution;uniform float uTime;
+      uniform vec4 uShip;uniform float uShipVisible;
       float hash(vec2 p){vec3 q=fract(vec3(p.xyx)*.1031);q+=dot(q,q.yzx+33.33);return fract((q.x+q.y)*q.z);}
       float noise(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(hash(i),hash(i+vec2(1.,0.)),f.x),mix(hash(i+vec2(0.,1.)),hash(i+vec2(1.,1.)),f.x),f.y);}
       void main(){
-        vec3 N=normalize(vNormal),V=normalize(uEye-vWorld),L=normalize(vec3(.6,.75,.35));
+        float distanceToEye=length(vWorld.xz-uEye.xz);
+        float nearDetail=1.-smoothstep(22.,90.,distanceToEye);
+        vec2 p=vWorld.xz;
+        float grain=noise(p*2.2+vec2(uTime*.18,-uTime*.31));
+        float fine=noise(p*5.5+vec2(-uTime*.29,uTime*.16));
+        vec2 ripple=vec2(sin(p.x*2.7+p.y*1.8-uTime*2.5),cos(p.y*3.2-p.x*1.3+uTime*1.9));
+        ripple+=vec2(sin(p.x*6.8+p.y*4.1+uTime*3.6),cos(p.y*5.4-p.x*3.8-uTime*2.8))*.30;
+        vec3 N=normalize(vNormal+vec3(ripple.x,0.,ripple.y)*(.035+fine*.035)*nearDetail);
+        vec3 V=normalize(uEye-vWorld),L=normalize(vec3(.48,.34,-.82));
         float fresnel=pow(1.-max(dot(N,V),0.),3.);
-        vec3 water=mix(vec3(.14,.53,.64),vec3(.27,.69,.73),clamp(vHeight+.48,0.,1.));
-        water=mix(water,vec3(.57,.82,.84),fresnel*.68);
-        float sparkle=pow(max(dot(reflect(-L,N),V),0.),110.);
-        float grain=noise(vWorld.xz*1.8+vec2(uTime*.13,-uTime*.18));
-        float foam=smoothstep(.23,.30,vHeight)*smoothstep(.49,.78,grain)*.20;
-        water=mix(water,vec3(.94,.98,.94),foam);
-        water+=vec3(.97,.97,.85)*sparkle*.35;
-        float fog=1.-exp(-max(length(vWorld.xz-uEye.xz)-28.,0.)*.025);
-        water=mix(water,vec3(.71,.88,.88),fog*.90);
+        vec3 water=mix(vec3(.055,.38,.52),vec3(.18,.63,.68),clamp(vHeight+.55,0.,1.));
+        water=mix(water,vec3(.64,.85,.87),fresnel*.72);
+        water+=vec3(.015,.045,.037)*(grain-.5)*nearDetail;
+        float reflected=max(dot(reflect(-L,N),V),0.);
+        float sparkle=pow(reflected,160.)*(.25+.75*smoothstep(.35,.72,fine));
+        float sunlight=pow(reflected,16.)*.15;
+        water+=vec3(1.,.91,.68)*(sparkle*.80+sunlight);
+        float crest=smoothstep(.235,.30,vHeight)*smoothstep(.48,.79,grain)*.24;
+        // Inverse yaw keeps foam attached to the hull; +X is the stern. The
+        // widening paired arms form a 19-degree wake without extra geometry.
+        vec2 delta=(p-uShip.xy)/max(uShip.w,.05);
+        float cy=cos(uShip.z),sy=sin(uShip.z);
+        vec2 local=vec2(cy*delta.x-sy*delta.y,sy*delta.x+cy*delta.y);
+        float trail=max(local.x-2.15,0.);
+        float wakeWidth=.72+trail*.35;
+        float edge=abs(local.y)-wakeWidth;
+        float arms=exp(-edge*edge/(.045+trail*.025));
+        float wakeGate=smoothstep(1.6,3.2,local.x)*(1.-smoothstep(11.,26.,trail));
+        float wakeGrain=noise(local*vec2(2.4,4.2)-vec2(uTime*1.9,uTime*.12));
+        float bands=.5+.5*sin(trail*5.2-uTime*3.5+local.y*1.8);
+        float center=(1.-smoothstep(.15,wakeWidth,abs(local.y)))*exp(-trail*.21);
+        float wake=(arms*(.35+.55*wakeGrain)+center*bands*.22)*wakeGate;
+        float bowRadius=length(local/vec2(3.35,1.02));
+        float bowEdge=(bowRadius-1.02)*16.;
+        float bow=exp(-bowEdge*bowEdge)*(1.-smoothstep(-1.4,.5,local.x));
+        bow*=.35+.55*grain;
+        float shipFoam=clamp(wake*.68+bow*.80,0.,.86)*uShipVisible;
+        float hullShadow=exp(-dot(local/vec2(2.5,.85),local/vec2(2.5,.85))*1.3)*.15*uShipVisible;
+        water*=1.-hullShadow;
+        water=mix(water,vec3(.88,.97,.95),clamp(crest+shipFoam,0.,.9));
+        float fog=1.-exp(-max(distanceToEye-25.,0.)*.025);
+        float mist=noise(p*vec2(.045,.08)+vec2(uTime*.016,-uTime*.009))*.65;
+        mist+=noise(p*vec2(.12,.06)-vec2(uTime*.012,uTime*.006))*.35;
+        mist=smoothstep(.38,.76,mist)*smoothstep(18.,60.,distanceToEye)*.14;
+        water=mix(water,vec3(.72,.88,.88),clamp(fog*.90+mist,0.,.96));
         gl_FragColor=vec4(water,1.);
-      }`, ["uVP", "uTime", "uEye", "uResolution"]);
+      }`, ["uVP", "uTime", "uEye", "uResolution", "uShip", "uShipVisible"]);
     boat = program(`
       precision highp float;attribute vec3 aPosition;attribute vec3 aNormal;attribute vec3 aColor;attribute vec2 aUv;
       uniform mat4 uVP;uniform mat4 uModel;uniform vec2 uClipShift;uniform float uTime;uniform float uCloth;
@@ -129,6 +177,46 @@
         gl_FragColor=vec4(color*light+vec3(1.,.89,.67)*sheen,1.);
       }
       `, ["uVP", "uModel", "uClipShift", "uFlag", "uTextured", "uTime", "uCloth", "uEye"]);
+    // Small, world-space details convey scale as the camera moves through the sea.
+    spray = program(`
+      precision highp float;attribute vec4 aSeed;uniform mat4 uVP;uniform vec4 uShip;
+      uniform float uTime;uniform float uPixelRatio;varying float vAlpha;
+      void main(){
+        float phase=fract(uTime*.24+aSeed.x), side=step(.5,aSeed.y)*2.-1.;
+        float bow=step(.55,aSeed.w);
+        float x=mix(2.9+phase*11.,-3.35+phase*2.3,bow);
+        float z=side*(mix(.9+phase*2.3,.55+phase*.9,bow)+sin(aSeed.x*40.+phase*8.)*.12);
+        float y=.09+sin(phase*3.14159)*(.15+aSeed.z*.65);
+        float c=cos(uShip.z),s=sin(uShip.z);
+        vec3 world=vec3(uShip.x+(c*x+s*z)*uShip.w,y*uShip.w,uShip.y+(-s*x+c*z)*uShip.w);
+        vec4 clip=uVP*vec4(world,1.);gl_Position=clip;
+        gl_PointSize=clamp((2.+aSeed.z*3.)*uPixelRatio*uShip.w*10./max(clip.w,1.),1.,6.);
+        vAlpha=sin(phase*3.14159)*(1.-phase)*.65;
+      }`, `
+      varying float vAlpha;
+      void main(){vec2 p=gl_PointCoord*2.-1.;float r=dot(p,p);if(r>1.)discard;
+        gl_FragColor=vec4(.92,.99,1.,exp(-r*2.5)*vAlpha);
+      }`, ["uVP","uShip","uTime","uPixelRatio"]);
+    birds = program(`
+      precision highp float;attribute vec3 aPosition;attribute vec4 aFlight;
+      uniform mat4 uVP;uniform vec4 uShip;uniform float uTime;varying float vDepth;
+      void main(){
+        float phase=uTime*.12+aFlight.w*6.28318;
+        vec3 local=aPosition;
+        local.y+=abs(local.x)*sin(uTime*(3.1+aFlight.w)+aFlight.w*20.)*.42;
+        vec3 center=aFlight.xyz+vec3(sin(phase)*4.,sin(phase*1.7)*.35,cos(phase)*3.);
+        float angle=phase*.13;vec3 wing=vec3(cos(angle)*local.x+sin(angle)*local.z,local.y,-sin(angle)*local.x+cos(angle)*local.z);
+        vec3 world=vec3(uShip.x,0.,uShip.y)+(center+wing)*uShip.w;
+        vec4 clip=uVP*vec4(world,1.);gl_Position=clip;vDepth=clip.w/max(uShip.w,.01);
+      }`, `
+      varying float vDepth;
+      void main(){float haze=smoothstep(15.,65.,vDepth);gl_FragColor=vec4(mix(vec3(.19,.36,.39),vec3(.65,.80,.81),haze),1.);}
+      `, ["uVP","uShip","uTime"]);
+    const seeds=[];for(let i=0;i<96;i+=1){seeds.push((i*.6180339)%1,(i*.7548776)%1,(i*.5698403)%1,(i*.438579)%1);}
+    sprayBuffer=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,sprayBuffer);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(seeds),gl.STATIC_DRAW);
+    const flock=[],wing=[[-.65,.02,-.05],[-.25,0,.16],[0,0,0],[0,0,0],[.25,0,.16],[.65,.02,-.05]];
+    for(let i=0;i<12;i+=1){const seed=(i*.6180339)%1,flight=[-14+((i*.7548776)%1)*28,6+seed*3,-20-((i*.438579)%1)*26,seed];wing.forEach(v=>flock.push(...v,...flight));}
+    birdBuffer=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,birdBuffer);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(flock),gl.STATIC_DRAW);
     skyBuffer = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, skyBuffer); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
     oceanMesh = makeOcean();
     const shapes = makeBoat(); hullMesh = upload(shapes.hull); sailMesh = upload(shapes.main); rearMesh = upload(shapes.rear); faceMesh = upload(shapes.face);
@@ -584,29 +672,26 @@
     const span = Math.min(rect.width * .90, Math.max(80, rect.height - 105) * 1.04);
     shipAnchor = {
       x: rect.left - canvasRect.left + rect.width * .5 + span * .025,
-      y: rect.bottom - canvasRect.top - 90,
+      y: rect.bottom - canvasRect.top - (width <= 560 ? 120 : 90),
       span,
     };
   }
   function draw(t) {
     if (lost) return;
-    const aspect = width / height;
+    const aspect = width / height, cinematic = root.dataset.cinema === "open";
     px += (tx - px) * .035; py += (ty - py) * .035; scroll += (scrollTarget - scroll) * .03;
-    const eye = [px * .42 + Math.sin(t * .23) * .13, mobile ? 7.2 : 6.4 + Math.sin(t * .31) * .11, mobile ? 21 : 18];
-    const target = [px * .3, -.1 + py * .15 - scroll * .1, -24];
+    const filmTime = Math.max(0, t - cinemaStarted);
+    const orbit = -.68 + Math.sin(filmTime * .052) * .58 + px * .2;
+    const radius = (mobile ? 20.5 : 14.5) + Math.cos(filmTime * .071) * 2.4;
+    const eye = cinematic
+      ? [Math.sin(orbit) * radius, 5.3 + Math.sin(filmTime * .09 + .3) * 1.1 - py * .65, Math.cos(orbit) * radius]
+      : [px * .42 + Math.sin(t * .23) * .13, mobile ? 7.2 : 6.4 + Math.sin(t * .31) * .11, mobile ? 21 : 18];
+    const target = cinematic ? [0, 2.5 + Math.sin(filmTime * .045) * .18, 0] : [px * .3, -.1 + py * .15 - scroll * .1, -24];
     const vp = matrix.multiply(matrix.perspective(aspect), matrix.look(eye, target));
-    gl.viewport(0, 0, canvas.width, canvas.height); gl.disable(gl.DEPTH_TEST); gl.disable(gl.CULL_FACE);
-    useProgram(sky.id); gl.bindBuffer(gl.ARRAY_BUFFER, skyBuffer); bindAttribute(sky.id, "aPosition", 2);
-    gl.uniform1f(sky.uniforms.uTime, t); gl.uniform1f(sky.uniforms.uAspect, aspect); gl.drawArrays(gl.TRIANGLES, 0, 3);
-    gl.enable(gl.DEPTH_TEST); gl.clear(gl.DEPTH_BUFFER_BIT);
-    useProgram(sea.id); gl.bindBuffer(gl.ARRAY_BUFFER, oceanMesh.position); bindAttribute(sea.id, "aPosition", 3);
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, oceanMesh.index); gl.uniformMatrix4fv(sea.uniforms.uVP, false, vp);
-    gl.uniform1f(sea.uniforms.uTime, t); gl.uniform3fv(sea.uniforms.uEye, eye); gl.uniform2f(sea.uniforms.uResolution, canvas.width, canvas.height);
-    gl.drawElements(gl.TRIANGLES, oceanMesh.count, gl.UNSIGNED_SHORT, 0);
-    let bx = 0, bz = -10, boatScale = 1, drawShip = Boolean(shipAnchor);
-    if (shipAnchor) {
-      // The ship's waterline is positioned in the scene's own canvas coordinates
-      // on every breakpoint. Real sea-plane placement preserves depth testing.
+    let bx = 0, bz = 0, boatScale = 1, drawShip = cinematic || Boolean(shipAnchor);
+    const yaw = .30 + px * (cinematic ? .025 : .05) + Math.sin(t * .12) * .025;
+    if (!cinematic && shipAnchor) {
+      // Intersect the hero composition anchor with the actual sea plane.
       const forward = normalize(subtract(target, eye));
       const right = normalize(cross(forward, [0, 1, 0]));
       const up = cross(right, forward);
@@ -620,22 +705,41 @@
         const position = eye.map((v, i) => v + ray[i] * distance);
         bx = position[0]; bz = position[2];
         const depth = dot(subtract(position, eye), forward);
-        boatScale = shipAnchor.span * depth * 2 / (height * f * 7.7);
+        const breath = .985 + Math.sin(t * .09) * .015;
+        boatScale = shipAnchor.span * depth * 2 / (height * f * 7.7) * breath;
       }
     }
+    const ship = new Float32Array([bx, bz, yaw, boatScale]);
+    gl.viewport(0, 0, canvas.width, canvas.height); gl.disable(gl.BLEND); gl.depthMask(true); gl.disable(gl.DEPTH_TEST); gl.disable(gl.CULL_FACE);
+    useProgram(sky.id); gl.bindBuffer(gl.ARRAY_BUFFER, skyBuffer); bindAttribute(sky.id, "aPosition", 2);
+    gl.uniform1f(sky.uniforms.uTime, t); gl.uniform1f(sky.uniforms.uAspect, aspect);
+    gl.uniform2f(sky.uniforms.uView, cinematic ? Math.sin(orbit) * .045 : px * .009, cinematic ? (eye[1] - 5) * .008 : py * .004);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+    gl.enable(gl.DEPTH_TEST); gl.clear(gl.DEPTH_BUFFER_BIT);
+    useProgram(sea.id); gl.bindBuffer(gl.ARRAY_BUFFER, oceanMesh.position); bindAttribute(sea.id, "aPosition", 3);
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, oceanMesh.index); gl.uniformMatrix4fv(sea.uniforms.uVP, false, vp);
+    gl.uniform1f(sea.uniforms.uTime, t); gl.uniform3fv(sea.uniforms.uEye, eye); gl.uniform2f(sea.uniforms.uResolution, canvas.width, canvas.height);
+    gl.uniform4fv(sea.uniforms.uShip, ship); gl.uniform1f(sea.uniforms.uShipVisible, drawShip ? 1 : 0);
+    gl.drawElements(gl.TRIANGLES, oceanMesh.count, gl.UNSIGNED_SHORT, 0);
     if (drawShip) {
-    const bob = Math.sin(bx * .34 + bz * .18 - t * .86) * .19
-      + Math.sin(bx * -.19 + bz * .43 - t * 1.19) * .085
-      + Math.sin(bx * .77 + bz * .55 + t * 1.7) * .025;
-    const model = matrix.boat(bx, bob + .045, bz, .30 + px * .04, Math.sin(t * .86) * .018, Math.sin(t * .63) * .012, boatScale);
-    useProgram(boat.id); gl.uniformMatrix4fv(boat.uniforms.uVP, false, vp); gl.uniformMatrix4fv(boat.uniforms.uModel, false, model);
-    gl.uniform2f(boat.uniforms.uClipShift, 0, 0); gl.uniform1f(boat.uniforms.uTime, t); gl.uniform3fv(boat.uniforms.uEye, eye);
-    gl.activeTexture(gl.TEXTURE0); gl.uniform1i(boat.uniforms.uFlag, 0);
-    [[hullMesh, 0, 0, flagTexture], [rearMesh, 0, 1, flagTexture], [sailMesh, 1, 1, flagTexture], [faceMesh, 1, 0, faceTexture]].forEach(([mesh, textured, cloth, texture]) => {
-      gl.bindTexture(gl.TEXTURE_2D, texture);
-      gl.bindBuffer(gl.ARRAY_BUFFER, mesh.buffer); bindAttribute(boat.id, "aPosition", 3, 44, 0); bindAttribute(boat.id, "aNormal", 3, 44, 12); bindAttribute(boat.id, "aColor", 3, 44, 24); bindAttribute(boat.id, "aUv", 2, 44, 36);
-      gl.uniform1f(boat.uniforms.uTextured, textured); gl.uniform1f(boat.uniforms.uCloth, cloth); gl.drawArrays(gl.TRIANGLES, 0, mesh.count);
-    });
+      const bob = Math.sin(bx * .34 + bz * .18 - t * .86) * .19
+        + Math.sin(bx * -.19 + bz * .43 - t * 1.19) * .085
+        + Math.sin(bx * .77 + bz * .55 + t * 1.7) * .025;
+      const model = matrix.boat(bx, bob + .045, bz, yaw, Math.sin(t * .86) * .018, Math.sin(t * .63) * .012, boatScale);
+      useProgram(boat.id); gl.uniformMatrix4fv(boat.uniforms.uVP, false, vp); gl.uniformMatrix4fv(boat.uniforms.uModel, false, model);
+      gl.uniform2f(boat.uniforms.uClipShift, 0, 0); gl.uniform1f(boat.uniforms.uTime, t); gl.uniform3fv(boat.uniforms.uEye, eye);
+      gl.activeTexture(gl.TEXTURE0); gl.uniform1i(boat.uniforms.uFlag, 0);
+      [[hullMesh, 0, 0, flagTexture], [rearMesh, 0, 1, flagTexture], [sailMesh, 1, 1, flagTexture], [faceMesh, 1, 0, faceTexture]].forEach(([mesh, textured, cloth, texture]) => {
+        gl.bindTexture(gl.TEXTURE_2D, texture);
+        gl.bindBuffer(gl.ARRAY_BUFFER, mesh.buffer); bindAttribute(boat.id, "aPosition", 3, 44, 0); bindAttribute(boat.id, "aNormal", 3, 44, 12); bindAttribute(boat.id, "aColor", 3, 44, 24); bindAttribute(boat.id, "aUv", 2, 44, 36);
+        gl.uniform1f(boat.uniforms.uTextured, textured); gl.uniform1f(boat.uniforms.uCloth, cloth); gl.drawArrays(gl.TRIANGLES, 0, mesh.count);
+      });
+      useProgram(birds.id);gl.bindBuffer(gl.ARRAY_BUFFER,birdBuffer);bindAttribute(birds.id,"aPosition",3,28,0);bindAttribute(birds.id,"aFlight",4,28,12);
+      gl.uniformMatrix4fv(birds.uniforms.uVP,false,vp);gl.uniform4fv(birds.uniforms.uShip,ship);gl.uniform1f(birds.uniforms.uTime,t);gl.drawArrays(gl.TRIANGLES,0,mobile ? 42 : 72);
+      gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);gl.depthMask(false);
+      useProgram(spray.id);gl.bindBuffer(gl.ARRAY_BUFFER,sprayBuffer);bindAttribute(spray.id,"aSeed",4);
+      gl.uniformMatrix4fv(spray.uniforms.uVP,false,vp);gl.uniform4fv(spray.uniforms.uShip,ship);gl.uniform1f(spray.uniforms.uTime,t);gl.uniform1f(spray.uniforms.uPixelRatio,canvas.width/width);gl.drawArrays(gl.POINTS,0,mobile ? 48 : 96);
+      gl.depthMask(true);gl.disable(gl.BLEND);
     }
     frame += 1;
     if (frame === 1) { root.classList.add("webgl-ocean-ready"); canvas.dataset.renderer = "webgl"; }
@@ -682,7 +786,28 @@
     }, { rootMargin: "80px" }).observe(canvas);
   }
   if (reduced.addEventListener) reduced.addEventListener("change", sync); else reduced.addListener(sync);
-  new MutationObserver(sync).observe(root, { attributes: true, attributeFilter: ["data-sea-motion"] });
+  new MutationObserver(() => {
+    const open = root.dataset.cinema === "open";
+    if (open !== cinemaOpen) {
+      cinemaOpen = open; cinemaStarted = elapsed; tx = 0; ty = 0; px = 0; py = 0; drag = null;
+      inView = open || canvas.getBoundingClientRect().bottom > 0;
+      resize();
+    }
+    sync();
+  }).observe(root, { attributes: true, attributeFilter: ["data-sea-motion", "data-cinema"] });
+  canvas.addEventListener("pointerdown", event => {
+    if (!cinemaOpen || event.pointerType === "mouse") return;
+    drag = { id: event.pointerId, x: event.clientX, y: event.clientY, tx, ty };
+    canvas.setPointerCapture(event.pointerId);
+  });
+  canvas.addEventListener("pointermove", event => {
+    if (!drag || drag.id !== event.pointerId) return;
+    tx = Math.max(-1, Math.min(1, drag.tx + (event.clientX - drag.x) / Math.max(width * .3, 1)));
+    ty = Math.max(-1, Math.min(1, drag.ty + (event.clientY - drag.y) / Math.max(height * .3, 1)));
+    if (!sailing()) { px = tx; py = ty; draw(elapsed); }
+  }, { passive: true });
+  const releaseDrag = () => { drag = null; };
+  canvas.addEventListener("pointerup", releaseDrag); canvas.addEventListener("pointercancel", releaseDrag);
   canvas.addEventListener("webglcontextlost", event => {
     event.preventDefault(); lost = true; if (request) window.cancelAnimationFrame(request); request = 0;
     root.classList.remove("webgl-ocean-ready"); canvas.dataset.renderer = "fallback";

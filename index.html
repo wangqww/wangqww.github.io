@@ -16,9 +16,11 @@
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="atlas.css?v=20261019">
   <link rel="stylesheet" href="journal.css?v=20261019">
+  <link rel="stylesheet" href="cinema.css?v=20261020">
   <script src="script.js" defer></script>
   <script src="voyage-motion.js" defer></script>
-  <script src="ocean-scene.js?v=20261019" defer></script>
+  <script src="ocean-scene.js?v=20261020" defer></script>
+  <script src="cinema-controls.js?v=20261020" defer></script>
   <noscript><style>.ocean-controls,.menu-toggle,.aj-research-toolbar{display:none!important}.nav-links{display:flex!important;position:static!important;flex-wrap:wrap}.nav-shell{height:auto;min-height:76px;flex-wrap:wrap;padding-block:16px}.atlas-journal [data-reveal]{opacity:1;transform:none}</style></noscript>
 </head>
 <body class="atlas-site">
@@ -46,7 +48,7 @@
           <div class="hero-footnote"><span class="fine-rule"></span><span>3D VISION &nbsp; / &nbsp; GEOMETRY &nbsp; / &nbsp; DISCOVERY</span></div>
         </div>
         <div class="voyage-scene-space">
-          <div class="scene-caption"><div><span class="scene-overline">THE THOUSAND SUNNY</span><p>Onwards, to new horizons.</p></div><div class="ocean-controls"><button id="sea-motion-toggle" type="button" aria-pressed="false" aria-label="Toggle ocean motion"><svg class="motion-icon-pause" viewBox="0 0 20 20" aria-hidden="true"><path d="M7 5v10M13 5v10"/></svg><svg class="motion-icon-play" viewBox="0 0 20 20" aria-hidden="true"><path d="m7 4 9 6-9 6Z"/></svg><span data-motion-label>Resume motion</span></button></div></div>
+          <div class="scene-caption"><div><span class="scene-overline">THE THOUSAND SUNNY</span><p>Onwards, to new horizons.</p></div><div class="ocean-controls"><button id="cinema-open" type="button" hidden aria-label="Enter cinematic voyage"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m7 4 9 6-9 6Z"/></svg><span>Enter the voyage</span></button><button id="sea-motion-toggle" type="button" aria-pressed="false" aria-label="Toggle ocean motion"><svg class="motion-icon-pause" viewBox="0 0 20 20" aria-hidden="true"><path d="M7 5v10M13 5v10"/></svg><svg class="motion-icon-play" viewBox="0 0 20 20" aria-hidden="true"><path d="m7 4 9 6-9 6Z"/></svg><span data-motion-label>Resume motion</span></button></div></div>
         </div>
       </div>
       <div class="hero-coast" aria-hidden="true"><svg viewBox="0 0 1440 60" preserveAspectRatio="none"><path d="M0 35C240 5 480 66 720 34S1200 14 1440 34V60H0Z"/></svg></div>
