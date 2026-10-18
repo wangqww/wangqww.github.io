@@ -46,8 +46,16 @@
   function normalize(v) { const l = Math.hypot(...v) || 1; return v.map(n => n / l); }
   function program(vertex, fragment, names) {
     const precision = gl.getShaderPrecisionFormat(gl.FRAGMENT_SHADER, gl.HIGH_FLOAT);
-    const prefix = precision && precision.precision > 0 ? "precision highp float;\n" : "precision mediump float;\n";
-    const shaders = [[gl.VERTEX_SHADER, vertex], [gl.FRAGMENT_SHADER, prefix + fragment]].map(([type, source]) => {
+    const level = precision && precision.precision > 0 ? "highp" : "mediump";
+    const prefix = `precision ${level} float;\n`;
+    // Cross-stage uniforms and varyings must have matching precision. Keep
+    // vertex-only camera/model calculations highp even on the mediump path.
+    const uniformsIn = source => new Set(Array.from(source.matchAll(/\buniform\s+(?:float|vec[234]|mat[234])\s+(\w+)/g), match => match[1]));
+    const vertexUniforms = uniformsIn(vertex), fragmentUniforms = uniformsIn(fragment);
+    const interfacePrecision = source => source.replace(/\b(uniform|varying)\s+(float|vec[234]|mat[234])\s+(\w+)/g,
+      (declaration, kind, type, name) => kind === "varying" || (vertexUniforms.has(name) && fragmentUniforms.has(name))
+        ? `${kind} ${level} ${type} ${name}` : declaration);
+    const shaders = [[gl.VERTEX_SHADER, interfacePrecision(vertex)], [gl.FRAGMENT_SHADER, prefix + interfacePrecision(fragment)]].map(([type, source]) => {
       const shader = gl.createShader(type);
       gl.shaderSource(shader, source); gl.compileShader(shader);
       if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) { gl.deleteShader(shader); throw new Error("Ocean shader unavailable"); }
@@ -60,71 +68,130 @@
     return { id, uniforms };
   }
 
+  // One sunset illuminates the sky, its reflection and the ship in world space.
+  // Fixed octave counts keep the atmosphere cheap enough for the existing caps.
+  const sunsetLight = `vec3 sunsetSun(){return normalize(vec3(.47,.075,-.88));}`;
+  const sunsetAtmosphere = `${sunsetLight}
+    float hash(vec2 p){vec3 q=fract(vec3(p.xyx)*.1031);q+=dot(q,q.yzx+33.33);return fract((q.x+q.y)*q.z);}
+    float noise(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(hash(i),hash(i+vec2(1.,0.)),f.x),mix(hash(i+vec2(0.,1.)),hash(i+vec2(1.,1.)),f.x),f.y);}
+    float cloudField(vec2 p,float detail){
+      float n=noise(p)*.44+noise(p*2.02+7.1)*.24+noise(p*4.07-3.8)*.16;
+      if(detail>.5)n+=noise(p*8.13+13.4)*.10+noise(p*16.31-19.7)*.06;
+      else n+=.08;
+      return n;
+    }
+    vec3 sunsetBase(vec3 direction){
+      float elevation=max(direction.y,0.);
+      float facing=pow(max(dot(normalize(vec3(direction.x,0.,direction.z)),normalize(vec3(.47,0.,-.88))),0.),4.);
+      vec3 horizon=mix(vec3(.66,.52,.58),vec3(1.,.66,.40),facing);
+      vec3 middle=mix(vec3(.39,.43,.61),vec3(.78,.48,.52),facing*.65);
+      vec3 color=mix(horizon,middle,smoothstep(0.,.27,elevation));
+      return mix(color,vec3(.19,.29,.47),smoothstep(.15,.85,elevation));
+    }
+    vec3 sunsetHaze(vec3 direction){
+      float alignment=max(dot(direction,sunsetSun()),0.);
+      vec3 color=sunsetBase(direction);
+      color+=vec3(.35,.13,.035)*pow(alignment,28.);
+      color+=vec3(.24,.13,.055)*pow(alignment,260.);
+      return color;
+    }
+    vec3 sunsetSky(vec3 direction,float detail){
+      vec3 rd=normalize(direction),sun=sunsetSun();
+      vec3 color=sunsetHaze(rd);
+      float alignment=max(dot(rd,sun),0.);
+      // Chord distance keeps both disc edges distinct on mediump GPUs, where
+      // dot-product thresholds this close to 1 would round to the same value.
+      float disc=1.-smoothstep(.0134,.0210,length(rd-sun));
+      color=mix(color,vec3(1.,.91,.68),disc);
+      // Project a high cloud layer onto the viewing ray. The same world-space
+      // field is sampled by reflected rays, so clouds do not stick to the lens.
+      vec2 p=rd.xz/(max(rd.y,.025)+.16);
+      p=mat2(.84,-.54,.54,.84)*p;
+      p=p*1.9+vec2(uTime*.009,-uTime*.004);
+      float warp=noise(p*.42+5.7);
+      vec2 cloudPoint=p+vec2(warp*.85,warp*.23);
+      float field=cloudField(cloudPoint,detail);
+      float veil=smoothstep(.425,.68,field)*smoothstep(.015,.13,rd.y);
+      float thin=1.-smoothstep(.45,.64,field);
+      float sunward=pow(alignment,5.);
+      vec3 shadow=mix(vec3(.24,.27,.39),vec3(.53,.34,.39),sunward*.55);
+      vec3 lit=mix(vec3(.69,.52,.59),vec3(1.,.68,.43),sunward);
+      float shaping=0.;
+      if(detail>.5){
+        // A short density probe toward the sun supplies internal light/shadow
+        // relief. Three extra noise samples, without marching through a volume.
+        float towardSun=cloudField(cloudPoint+vec2(-.012,-.15),0.);
+        shaping=clamp((field-towardSun)*5.,-.17,.30);
+      }
+      vec3 cloud=mix(shadow,lit,clamp(.30+thin*.60+shaping,0.,1.));
+      color=mix(color,cloud,veil*.88);
+      // Thin stretched cirrus adds a finer scale above the larger cloud banks.
+      if(detail>.5){
+        float streak=noise(p*vec2(.9,5.2)+vec2(8.,uTime*.007));
+        float cirrus=smoothstep(.60,.80,streak)*smoothstep(.18,.55,rd.y)*(1.-veil)*.17;
+        color=mix(color,vec3(.84,.64,.66),cirrus);
+      }
+      return color;
+    }`;
+
+  // Wave terms are shared between the mesh shader and the CPU boat height.
+  // [x frequency, z frequency, angular speed, amplitude, phase]
+  const swells = [[.29,.17,-.77,.18,0],[-.18,.39,-1.03,.085,1.4],[.62,.41,1.41,.037,2.7],[-.91,.56,-1.93,.018,.8],[1.18,.83,2.21,.009,4.2]];
+  const waveGLSL = swells.map(([x,z,speed,amplitude,phase], i) => `
+    float w${i}=dot(p,vec2(${x.toFixed(4)},${z.toFixed(4)}))+uTime*${speed.toFixed(4)}+${phase.toFixed(4)};
+    h+=sin(w${i})*${amplitude.toFixed(4)};
+    slope+=cos(w${i})*vec2(${x.toFixed(4)},${z.toFixed(4)})*${amplitude.toFixed(4)};`).join("");
+  function swellHeight(x,z,t){return swells.reduce((h,[kx,kz,speed,amplitude,phase])=>h+Math.sin(x*kx+z*kz+t*speed+phase)*amplitude,0);}
+
   // Mesh positions are world-space, so the horizon and waves respond to the camera.
   let sky, sea, boat, spray, birds, oceanMesh, hullMesh, sailMesh, rearMesh, faceMesh, flagTexture, faceTexture, skyBuffer, sprayBuffer, birdBuffer;
   try {
     sky = program("attribute vec2 aPosition;varying vec2 vUv;void main(){vUv=aPosition*.5+.5;gl_Position=vec4(aPosition,0.,1.);}", `
-      varying vec2 vUv;uniform float uTime;uniform float uAspect;uniform vec2 uView;
-      float hash(vec2 p){vec3 q=fract(vec3(p.xyx)*.1031);q+=dot(q,q.yzx+33.33);return fract((q.x+q.y)*q.z);}
-      float noise(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(hash(i),hash(i+vec2(1.,0.)),f.x),mix(hash(i+vec2(0.,1.)),hash(i+vec2(1.,1.)),f.x),f.y);}
+      varying vec2 vUv;uniform float uTime;uniform float uAspect;uniform float uTanHalfFov;
+      uniform vec3 uForward;uniform vec3 uRight;uniform vec3 uUp;
+      ${sunsetAtmosphere}
       void main(){
-        vec2 uv=vUv+uView;
-        vec3 horizon=vec3(.85,.94,.93),upper=vec3(.44,.72,.86);
-        vec3 color=mix(horizon,upper,smoothstep(.30,1.,uv.y));
-        vec2 sun=uv-vec2(.82,.79);sun.x*=uAspect;
-        float d=length(sun);
-        color=mix(color,vec3(1.,.95,.80),exp(-d*7.)*.30);
-        color+=vec3(.10,.075,.035)*exp(-d*d*95.);
-        color=mix(color,vec3(1.,.98,.88),(1.-smoothstep(.015,.021,d))*.88);
-        // Soft cloud masses have a broad shape and finer lit edges, drifting at
-        // different speeds. Four noise samples avoid a heavy sky ray march.
-        vec2 p=vec2(uv.x*uAspect*3.1+uTime*.012,uv.y*6.5);
-        float billow=noise(p)*.64+noise(p*2.03+4.8)*.26+noise(p*4.09-8.2)*.10;
-        float body=smoothstep(.49,.72,billow)*smoothstep(.43,.64,uv.y);
-        vec3 cloudColor=mix(vec3(.81,.88,.89),vec3(1.,.99,.94),smoothstep(.50,.68,billow));
-        color=mix(color,cloudColor,body*.82);
-        float wisps=smoothstep(.54,.79,noise(vec2(uv.x*uAspect*2.4-uTime*.006,uv.y*20.)));
-        wisps*=smoothstep(.67,.94,uv.y)*(1.-body)*.17;
-        color=mix(color,vec3(.98,.99,.97),wisps);
-        gl_FragColor=vec4(color,1.);
-      }`, ["uTime", "uAspect", "uView"]);
+        vec2 screen=vUv*2.-1.;
+        vec3 ray=normalize(uForward+(uRight*screen.x*uAspect+uUp*screen.y)*uTanHalfFov);
+        gl_FragColor=vec4(sunsetSky(ray,1.),1.);
+      }`, ["uTime", "uAspect", "uTanHalfFov", "uForward", "uRight", "uUp"]);
     sea = program(`
       precision highp float;attribute vec3 aPosition;uniform mat4 uVP;uniform float uTime;
       varying vec3 vWorld;varying vec3 vNormal;varying float vHeight;
       void main(){
         vec2 p=aPosition.xz;
-        float a=dot(p,vec2(.34,.18))-uTime*.86;
-        float b=dot(p,vec2(-.19,.43))-uTime*1.19;
-        float c=dot(p,vec2(.77,.55))+uTime*1.7;
-        float h=sin(a)*.19+sin(b)*.085+sin(c)*.025;
-        vec2 slope=cos(a)*vec2(.34,.18)*.19+cos(b)*vec2(-.19,.43)*.085+cos(c)*vec2(.77,.55)*.025;
+        float h=0.;vec2 slope=vec2(0.);
+        ${waveGLSL}
         vWorld=vec3(p.x,h,p.y);vNormal=normalize(vec3(-slope.x,1.,-slope.y));vHeight=h;
         gl_Position=uVP*vec4(vWorld,1.);
       }`, `
       varying vec3 vWorld;varying vec3 vNormal;varying float vHeight;
       uniform vec3 uEye;uniform vec2 uResolution;uniform float uTime;
       uniform vec4 uShip;uniform float uShipVisible;
-      float hash(vec2 p){vec3 q=fract(vec3(p.xyx)*.1031);q+=dot(q,q.yzx+33.33);return fract((q.x+q.y)*q.z);}
-      float noise(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(hash(i),hash(i+vec2(1.,0.)),f.x),mix(hash(i+vec2(0.,1.)),hash(i+vec2(1.,1.)),f.x),f.y);}
+      ${sunsetAtmosphere}
       void main(){
         float distanceToEye=length(vWorld.xz-uEye.xz);
-        float nearDetail=1.-smoothstep(22.,90.,distanceToEye);
+        float nearDetail=1.-smoothstep(18.,90.,distanceToEye);
         vec2 p=vWorld.xz;
-        float grain=noise(p*2.2+vec2(uTime*.18,-uTime*.31));
-        float fine=noise(p*5.5+vec2(-uTime*.29,uTime*.16));
-        vec2 ripple=vec2(sin(p.x*2.7+p.y*1.8-uTime*2.5),cos(p.y*3.2-p.x*1.3+uTime*1.9));
-        ripple+=vec2(sin(p.x*6.8+p.y*4.1+uTime*3.6),cos(p.y*5.4-p.x*3.8-uTime*2.8))*.30;
-        vec3 N=normalize(vNormal+vec3(ripple.x,0.,ripple.y)*(.035+fine*.035)*nearDetail);
-        vec3 V=normalize(uEye-vWorld),L=normalize(vec3(.48,.34,-.82));
-        float fresnel=pow(1.-max(dot(N,V),0.),3.);
-        vec3 water=mix(vec3(.055,.38,.52),vec3(.18,.63,.68),clamp(vHeight+.55,0.,1.));
-        water=mix(water,vec3(.64,.85,.87),fresnel*.72);
-        water+=vec3(.015,.045,.037)*(grain-.5)*nearDetail;
+        float grain=noise(p*1.8+vec2(uTime*.11,-uTime*.21));
+        float fine=noise(p*4.7+vec2(-uTime*.19,uTime*.14));
+        float warp=(grain-.5)*1.6;
+        vec2 ripple=vec2(.82,.57)*cos(dot(p,vec2(2.3,1.6))-uTime*2.4+warp)*.058;
+        ripple+=vec2(-.41,.91)*cos(dot(p,vec2(-2.1,4.6))-uTime*3.1+warp)*.040;
+        ripple+=vec2(.94,-.34)*cos(dot(p,vec2(7.3,-2.6))+uTime*4.2)*.018;
+        ripple+=vec2(.23,.97)*cos(dot(p,vec2(3.1,13.))-uTime*5.3)*.008;
+        vec3 N=normalize(vNormal+vec3(ripple.x,0.,ripple.y)*nearDetail);
+        vec3 V=normalize(uEye-vWorld),L=sunsetSun();
+        float fresnel=.025+.975*pow(1.-max(dot(N,V),0.),5.);
+        vec3 reflectedRay=reflect(-V,N);reflectedRay.y=max(reflectedRay.y,.008);
+        vec3 reflectedSky=sunsetSky(normalize(reflectedRay),0.);
+        vec3 depthColor=mix(vec3(.028,.115,.16),vec3(.075,.22,.25),clamp(vHeight*.7+.45,0.,1.));
+        vec3 water=mix(depthColor,reflectedSky,.22+fresnel*.72);
         float reflected=max(dot(reflect(-L,N),V),0.);
-        float sparkle=pow(reflected,160.)*(.25+.75*smoothstep(.35,.72,fine));
-        float sunlight=pow(reflected,16.)*.15;
-        water+=vec3(1.,.91,.68)*(sparkle*.80+sunlight);
-        float crest=smoothstep(.235,.30,vHeight)*smoothstep(.48,.79,grain)*.24;
+        float sparkle=pow(reflected,320.)*(.28+.72*smoothstep(.28,.75,fine));
+        float sunlight=pow(reflected,32.)*.10;
+        water+=vec3(1.,.65,.29)*(sparkle*.65+sunlight);
+        float crest=smoothstep(.27,.34,vHeight)*smoothstep(.60,.83,grain)*.08;
         // Inverse yaw keeps foam attached to the hull; +X is the stern. The
         // widening paired arms form a 19-degree wake without extra geometry.
         vec2 delta=(p-uShip.xy)/max(uShip.w,.05);
@@ -143,15 +210,15 @@
         float bowEdge=(bowRadius-1.02)*16.;
         float bow=exp(-bowEdge*bowEdge)*(1.-smoothstep(-1.4,.5,local.x));
         bow*=.35+.55*grain;
-        float shipFoam=clamp(wake*.68+bow*.80,0.,.86)*uShipVisible;
+        float shipFoam=clamp(wake*.43+bow*.53,0.,.70)*uShipVisible;
         float hullShadow=exp(-dot(local/vec2(2.5,.85),local/vec2(2.5,.85))*1.3)*.15*uShipVisible;
         water*=1.-hullShadow;
-        water=mix(water,vec3(.88,.97,.95),clamp(crest+shipFoam,0.,.9));
-        float fog=1.-exp(-max(distanceToEye-25.,0.)*.025);
-        float mist=noise(p*vec2(.045,.08)+vec2(uTime*.016,-uTime*.009))*.65;
-        mist+=noise(p*vec2(.12,.06)-vec2(uTime*.012,uTime*.006))*.35;
-        mist=smoothstep(.38,.76,mist)*smoothstep(18.,60.,distanceToEye)*.14;
-        water=mix(water,vec3(.72,.88,.88),clamp(fog*.90+mist,0.,.96));
+        water=mix(water,vec3(.77,.73,.66),clamp(crest+shipFoam,0.,.78));
+        float fog=1.-exp(-max(distanceToEye-28.,0.)*.034);
+        // At the finite mesh edge this is exactly the background ray, including
+        // sunset glow, so distant swells dissolve into the atmospheric horizon.
+        vec3 horizonRay=normalize(vWorld-uEye);
+        water=mix(water,sunsetHaze(horizonRay),fog);
         gl_FragColor=vec4(water,1.);
       }`, ["uVP", "uTime", "uEye", "uResolution", "uShip", "uShipVisible"]);
     boat = program(`
@@ -167,14 +234,21 @@
       `, `
       varying vec3 vNormal;varying vec3 vColor;varying vec2 vUv;varying vec3 vWorld;varying float vHeight;
       uniform sampler2D uFlag;uniform float uTextured;uniform float uCloth;uniform vec3 uEye;
+      ${sunsetLight}
       void main(){
-        vec3 n=normalize(vNormal),lightDirection=normalize(vec3(-.45,.82,.65));
-        float light=.62+.32*max(dot(n,lightDirection),0.)+.09*max(dot(n,normalize(vec3(.7,.3,-.5))),0.);
-        light*=.92+.08*smoothstep(-.1,1.6,vHeight);
+        vec3 n=normalize(vNormal),lightDirection=sunsetSun();
+        float diffuse=max(dot(n,lightDirection),0.);
+        float skyFill=.52+.20*max(n.y,0.);
+        float bounce=max(dot(n,normalize(vec3(-.25,.4,.75))),0.)*.24;
+        vec3 illumination=vec3(.67,.73,.88)*skyFill+vec3(1.,.79,.62)*bounce;
+        illumination+=vec3(1.,.56,.30)*pow(1.-abs(n.y),2.)*.045;
+        illumination+=vec3(1.,.63,.33)*diffuse*.92;
+        illumination+=vec3(1.,.68,.43)*max(dot(-n,lightDirection),0.)*uCloth*.28;
+        illumination*=.89+.11*smoothstep(-.1,1.6,vHeight);
         vec4 decal=texture2D(uFlag,vUv);vec3 color=mix(vColor,decal.rgb,decal.a*uTextured);
         vec3 halfDirection=normalize(lightDirection+normalize(uEye-vWorld));
-        float sheen=pow(max(dot(n,halfDirection),0.),44.)*.065*(1.-uCloth);
-        gl_FragColor=vec4(color*light+vec3(1.,.89,.67)*sheen,1.);
+        float sheen=pow(max(dot(n,halfDirection),0.),48.)*.12*(1.-uCloth);
+        gl_FragColor=vec4(color*illumination+vec3(1.,.71,.41)*sheen,1.);
       }
       `, ["uVP", "uModel", "uClipShift", "uFlag", "uTextured", "uTime", "uCloth", "uEye"]);
     // Small, world-space details convey scale as the camera moves through the sea.
@@ -195,7 +269,7 @@
       }`, `
       varying float vAlpha;
       void main(){vec2 p=gl_PointCoord*2.-1.;float r=dot(p,p);if(r>1.)discard;
-        gl_FragColor=vec4(.92,.99,1.,exp(-r*2.5)*vAlpha);
+        gl_FragColor=vec4(.98,.82,.63,exp(-r*2.5)*vAlpha*.72);
       }`, ["uVP","uShip","uTime","uPixelRatio"]);
     birds = program(`
       precision highp float;attribute vec3 aPosition;attribute vec4 aFlight;
@@ -210,7 +284,7 @@
         vec4 clip=uVP*vec4(world,1.);gl_Position=clip;vDepth=clip.w/max(uShip.w,.01);
       }`, `
       varying float vDepth;
-      void main(){float haze=smoothstep(15.,65.,vDepth);gl_FragColor=vec4(mix(vec3(.19,.36,.39),vec3(.65,.80,.81),haze),1.);}
+      void main(){float haze=smoothstep(15.,65.,vDepth);gl_FragColor=vec4(mix(vec3(.18,.20,.27),vec3(.66,.50,.51),haze),1.);}
       `, ["uVP","uShip","uTime"]);
     const seeds=[];for(let i=0;i<96;i+=1){seeds.push((i*.6180339)%1,(i*.7548776)%1,(i*.5698403)%1,(i*.438579)%1);}
     sprayBuffer=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,sprayBuffer);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(seeds),gl.STATIC_DRAW);
@@ -687,14 +761,14 @@
       ? [Math.sin(orbit) * radius, 5.3 + Math.sin(filmTime * .09 + .3) * 1.1 - py * .65, Math.cos(orbit) * radius]
       : [px * .42 + Math.sin(t * .23) * .13, mobile ? 7.2 : 6.4 + Math.sin(t * .31) * .11, mobile ? 21 : 18];
     const target = cinematic ? [0, 2.5 + Math.sin(filmTime * .045) * .18, 0] : [px * .3, -.1 + py * .15 - scroll * .1, -24];
+    const forward = normalize(subtract(target, eye));
+    const right = normalize(cross(forward, [0, 1, 0]));
+    const up = cross(right, forward);
     const vp = matrix.multiply(matrix.perspective(aspect), matrix.look(eye, target));
     let bx = 0, bz = 0, boatScale = 1, drawShip = cinematic || Boolean(shipAnchor);
     const yaw = .30 + px * (cinematic ? .025 : .05) + Math.sin(t * .12) * .025;
     if (!cinematic && shipAnchor) {
       // Intersect the hero composition anchor with the actual sea plane.
-      const forward = normalize(subtract(target, eye));
-      const right = normalize(cross(forward, [0, 1, 0]));
-      const up = cross(right, forward);
       const f = 1 / Math.tan(Math.PI / 7.8);
       const nx = (shipAnchor.x / width * 2 - 1) * aspect / f;
       const ny = (1 - shipAnchor.y / height * 2) / f;
@@ -713,7 +787,8 @@
     gl.viewport(0, 0, canvas.width, canvas.height); gl.disable(gl.BLEND); gl.depthMask(true); gl.disable(gl.DEPTH_TEST); gl.disable(gl.CULL_FACE);
     useProgram(sky.id); gl.bindBuffer(gl.ARRAY_BUFFER, skyBuffer); bindAttribute(sky.id, "aPosition", 2);
     gl.uniform1f(sky.uniforms.uTime, t); gl.uniform1f(sky.uniforms.uAspect, aspect);
-    gl.uniform2f(sky.uniforms.uView, cinematic ? Math.sin(orbit) * .045 : px * .009, cinematic ? (eye[1] - 5) * .008 : py * .004);
+    gl.uniform1f(sky.uniforms.uTanHalfFov, Math.tan(Math.PI / 7.8));
+    gl.uniform3fv(sky.uniforms.uForward, forward); gl.uniform3fv(sky.uniforms.uRight, right); gl.uniform3fv(sky.uniforms.uUp, up);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
     gl.enable(gl.DEPTH_TEST); gl.clear(gl.DEPTH_BUFFER_BIT);
     useProgram(sea.id); gl.bindBuffer(gl.ARRAY_BUFFER, oceanMesh.position); bindAttribute(sea.id, "aPosition", 3);
@@ -722,9 +797,7 @@
     gl.uniform4fv(sea.uniforms.uShip, ship); gl.uniform1f(sea.uniforms.uShipVisible, drawShip ? 1 : 0);
     gl.drawElements(gl.TRIANGLES, oceanMesh.count, gl.UNSIGNED_SHORT, 0);
     if (drawShip) {
-      const bob = Math.sin(bx * .34 + bz * .18 - t * .86) * .19
-        + Math.sin(bx * -.19 + bz * .43 - t * 1.19) * .085
-        + Math.sin(bx * .77 + bz * .55 + t * 1.7) * .025;
+      const bob = swellHeight(bx, bz, t);
       const model = matrix.boat(bx, bob + .045, bz, yaw, Math.sin(t * .86) * .018, Math.sin(t * .63) * .012, boatScale);
       useProgram(boat.id); gl.uniformMatrix4fv(boat.uniforms.uVP, false, vp); gl.uniformMatrix4fv(boat.uniforms.uModel, false, model);
       gl.uniform2f(boat.uniforms.uClipShift, 0, 0); gl.uniform1f(boat.uniforms.uTime, t); gl.uniform3fv(boat.uniforms.uEye, eye);

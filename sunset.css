@@ -1,0 +1,24 @@
+/* A warm reading margin opens onto the blue hour sea. */
+.voyage-hero,.ocean-world{background:#7f7d94}
+.ocean-fallback{background-image:linear-gradient(180deg,#73658b70 0%,#e89b6d70 43%,#2b465c66 100%),url('assets/voyage-hero.webp');background-blend-mode:multiply,normal;opacity:1}
+.ocean-light{background:linear-gradient(90deg,#faf9f5 0%,#fcf7eff5 24%,#fcf4e9b8 35%,#f9e6d449 47%,#f3d1b513 56%,transparent 65%)}
+.hero-tagline em{color:#a35e46}
+.hero-eyebrow>span{background:#c78961;box-shadow:0 0 0 5px #c7896112}
+.hero-description,.hero-affiliation{color:#586b70}
+.scene-caption{color:#fff2db;text-shadow:0 1px 8px #152b47a6}
+.scene-overline{color:#f9e8ca}
+#cinema-open{background:#f5e4c7;color:#263f4a;border-color:#fff0d9;box-shadow:0 5px 20px #12263c33;text-shadow:none}
+#cinema-open:hover{background:#fff0d5;box-shadow:0 6px 24px #12263c44}
+.scene-caption #sea-motion-toggle{color:#fff5e3;background:#193b5166;border-color:#f5e1c487;backdrop-filter:blur(6px);text-shadow:none}
+.scene-caption #sea-motion-toggle:hover{background:#193b51a6}
+#sea-cinema{background:#65657d}
+.cinema-vignette{background:linear-gradient(180deg,#24213745 0,transparent 24%,transparent 68%,#101d3480 100%),radial-gradient(ellipse at 53% 45%,transparent 48%,#1e253c33 100%)}
+.cinema-close,.cinema-motion{background:#25354b55;border-color:#f6d9b878}
+.cinema-close:hover,.cinema-motion:hover{background:#25354b9c;border-color:#ffe8ca}
+@media(max-width:800px){
+  .voyage-hero{background:#faf9f5}
+  .ocean-world{top:41%}
+  .ocean-light{background:linear-gradient(180deg,#faf9f5 0%,#fcf7eff7 10%,#fcf4e9b8 20%,#f9e5d438 29%,transparent 38%)}
+  .scene-caption{color:#fff2db}
+}
+@media(prefers-reduced-motion:reduce){#cinema-open,.scene-caption #sea-motion-toggle{transition:none}}
