@@ -5,12 +5,12 @@
   if (!canvas) return;
   const root = document.documentElement;
   const shipSpace = document.querySelector(".voyage-scene-space");
-  let shipAnchor = null;
+  let shipAnchor = null, canvasBounds = { left: 0, top: 0 };
   let gl;
   try { gl = canvas.getContext("webgl", { alpha: false, antialias: true, powerPreference: "low-power" }); } catch (_) { return; }
   if (!gl) return;
 
-  let frame = 0, request = 0, previous = 0, elapsed = 0, lastPaint = 0, lost = false;
+  let frame = 0, request = 0, previous = 0, elapsed = 0, lastPaint = 0, lost = false, inView = true;
   let width = 1, height = 1, mobile = false, scrollTarget = 0, scroll = 0;
   let px = 0, py = 0, tx = 0, ty = 0;
   const reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -60,20 +60,20 @@
   }
 
   // Mesh positions are world-space, so the horizon and waves respond to the camera.
-  let sky, sea, boat, oceanMesh, hullMesh, sailMesh, rearMesh, flagTexture, skyBuffer;
+  let sky, sea, boat, oceanMesh, hullMesh, sailMesh, rearMesh, faceMesh, flagTexture, faceTexture, skyBuffer;
   try {
     sky = program("attribute vec2 aPosition;varying vec2 vUv;void main(){vUv=aPosition*.5+.5;gl_Position=vec4(aPosition,0.,1.);}", `
       varying vec2 vUv;uniform float uTime;uniform float uAspect;
       float cloud(vec2 p){return sin(p.x*2.3+sin(p.y*4.))*sin(p.y*7.+p.x*.7);}
       void main(){
-        vec3 horizon=vec3(.36,.64,.66), upper=vec3(.075,.25,.34);
+        vec3 horizon=vec3(.84,.94,.94), upper=vec3(.59,.81,.88);
         vec3 color=mix(horizon,upper,smoothstep(.36,1.,vUv.y));
-        vec2 sun=vUv-vec2(.79,.76);sun.x*=uAspect;
-        float d=length(sun);color+=vec3(.65,.42,.16)*exp(-d*7.)*.45;
-        color=mix(color,vec3(.99,.87,.61),1.-smoothstep(.019,.023,d));
+        vec2 sun=vUv-vec2(.82,.79);sun.x*=uAspect;
+        float d=length(sun);color=mix(color,vec3(1.,.96,.83),exp(-d*9.)*.20);
+        color=mix(color,vec3(1.,.98,.87),(1.-smoothstep(.017,.020,d))*.75);
         float c=smoothstep(.4,.8,cloud(vec2(vUv.x*5.+uTime*.006,vUv.y*3.)))*smoothstep(.45,.7,vUv.y);
-        color=mix(color,vec3(.73,.81,.78),c*.12);
-        color*=mix(.68,1.04,smoothstep(0.,.85,vUv.x));gl_FragColor=vec4(color,1.);
+        color=mix(color,vec3(.98,.98,.93),c*.22);
+        gl_FragColor=vec4(color,1.);
       }`, ["uTime", "uAspect"]);
     sea = program(`
       precision highp float;attribute vec3 aPosition;uniform mat4 uVP;uniform float uTime;
@@ -83,8 +83,8 @@
         float a=dot(p,vec2(.34,.18))-uTime*.86;
         float b=dot(p,vec2(-.19,.43))-uTime*1.19;
         float c=dot(p,vec2(.77,.55))+uTime*1.7;
-        float h=sin(a)*.29+sin(b)*.15+sin(c)*.045;
-        vec2 slope=cos(a)*vec2(.34,.18)*.29+cos(b)*vec2(-.19,.43)*.15+cos(c)*vec2(.77,.55)*.045;
+        float h=sin(a)*.19+sin(b)*.085+sin(c)*.025;
+        vec2 slope=cos(a)*vec2(.34,.18)*.19+cos(b)*vec2(-.19,.43)*.085+cos(c)*vec2(.77,.55)*.025;
         vWorld=vec3(p.x,h,p.y);vNormal=normalize(vec3(-slope.x,1.,-slope.y));vHeight=h;
         gl_Position=uVP*vec4(vWorld,1.);
       }`, `
@@ -95,16 +95,15 @@
       void main(){
         vec3 N=normalize(vNormal),V=normalize(uEye-vWorld),L=normalize(vec3(.6,.75,.35));
         float fresnel=pow(1.-max(dot(N,V),0.),3.);
-        vec3 water=mix(vec3(.018,.23,.29),vec3(.055,.48,.49),clamp(vHeight+.48,0.,1.));
-        water=mix(water,vec3(.33,.61,.63),fresnel*.72);
+        vec3 water=mix(vec3(.14,.53,.64),vec3(.27,.69,.73),clamp(vHeight+.48,0.,1.));
+        water=mix(water,vec3(.57,.82,.84),fresnel*.68);
         float sparkle=pow(max(dot(reflect(-L,N),V),0.),110.);
         float grain=noise(vWorld.xz*1.8+vec2(uTime*.13,-uTime*.18));
-        float foam=smoothstep(.30,.44,vHeight)*smoothstep(.22,.75,grain)*.48;
-        water=mix(water,vec3(.78,.89,.83),foam);
-        water+=vec3(1.,.85,.56)*sparkle*.8;
+        float foam=smoothstep(.23,.30,vHeight)*smoothstep(.49,.78,grain)*.20;
+        water=mix(water,vec3(.94,.98,.94),foam);
+        water+=vec3(.97,.97,.85)*sparkle*.35;
         float fog=1.-exp(-max(length(vWorld.xz-uEye.xz)-28.,0.)*.025);
-        water=mix(water,vec3(.34,.61,.63),fog*.88);
-        water*=mix(.68,1.08,smoothstep(.02,.8,gl_FragCoord.x/uResolution.x));
+        water=mix(water,vec3(.71,.88,.88),fog*.90);
         gl_FragColor=vec4(water,1.);
       }`, ["uVP", "uTime", "uEye", "uResolution"]);
     boat = program(`
@@ -122,8 +121,8 @@
       uniform sampler2D uFlag;uniform float uTextured;uniform float uCloth;uniform vec3 uEye;
       void main(){
         vec3 n=normalize(vNormal),lightDirection=normalize(vec3(-.45,.82,.65));
-        float light=.50+.43*max(dot(n,lightDirection),0.)+.10*max(dot(n,normalize(vec3(.7,.3,-.5))),0.);
-        light*=.87+.13*smoothstep(-.1,1.6,vHeight);
+        float light=.62+.32*max(dot(n,lightDirection),0.)+.09*max(dot(n,normalize(vec3(.7,.3,-.5))),0.);
+        light*=.92+.08*smoothstep(-.1,1.6,vHeight);
         vec4 decal=texture2D(uFlag,vUv);vec3 color=mix(vColor,decal.rgb,decal.a*uTextured);
         vec3 halfDirection=normalize(lightDirection+normalize(uEye-vWorld));
         float sheen=pow(max(dot(n,halfDirection),0.),44.)*.065*(1.-uCloth);
@@ -132,8 +131,8 @@
       `, ["uVP", "uModel", "uClipShift", "uFlag", "uTextured", "uTime", "uCloth", "uEye"]);
     skyBuffer = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, skyBuffer); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
     oceanMesh = makeOcean();
-    const shapes = makeBoat(); hullMesh = upload(shapes.hull); sailMesh = upload(shapes.main); rearMesh = upload(shapes.rear);
-    flagTexture = makeFlag();
+    const shapes = makeBoat(); hullMesh = upload(shapes.hull); sailMesh = upload(shapes.main); rearMesh = upload(shapes.rear); faceMesh = upload(shapes.face);
+    flagTexture = makeFlag(); faceTexture = makeLionFace();
   } catch (_) {
     canvas.dataset.renderer = "fallback";
     return;
@@ -156,9 +155,9 @@
   }
 
   function makeBoat() {
-    const hull = [], main = [], rear = [];
-    const wood = [.52, .27, .13], darkWood = [.30, .14, .075], gold = [.94, .64, .22];
-    const cream = [.97, .90, .73], ivory = [1, .97, .85], red = [.77, .20, .14];
+    const hull = [], main = [], rear = [], face = [];
+    const wood = [.62, .35, .18], darkWood = [.38, .20, .11], gold = [.95, .71, .32];
+    const cream = [.99, .94, .81], ivory = [1, .98, .89], red = [.82, .25, .18];
     const ink = [.075, .15, .18], rope = [.63, .49, .30], glass = [.09, .34, .39];
     const axes = [[1, 0, 0], [0, 1, 0], [0, 0, 1]], TAU = Math.PI * 2;
     const shade = (color, amount) => color.map(n => Math.min(1, n * amount));
@@ -311,37 +310,54 @@
     ring([1.06,1.27,1.12],[0,0,1],.19,.055,ivory,24);
     for(let i=0;i<4;i+=1)ring([1.06,1.27,1.12],[0,0,1],.19,.057,red,3,6,i*Math.PI/2,i*Math.PI/2+.30);
 
-    // The lion is sculpted in a forward-facing local frame, not a flat badge.
-    const faceNormal=normalize([-.76,0,.65]),faceRight=[faceNormal[2],0,-faceNormal[0]];
-    const faceAxes=[faceRight,[0,1,0],faceNormal],head=[-3.04,1.29,.05];
+    // A round sun-lion with ten swept, pointed rays. Facial linework is
+    // printed onto a curved cap, keeping the simple Sunny expression crisp.
+    const faceNormal=normalize([-.80,0,.60]),faceRight=[faceNormal[2],0,-faceNormal[0]];
+    const faceAxes=[faceRight,[0,1,0],faceNormal],head=[-3.08,1.31,.06];
     const fp=p=>along(head,faceAxes,p);
-    const faceSphere=(p,size,color,slices=20,bands=12,basis=faceAxes)=>sphere(fp(p),size,color,slices,bands,basis);
-    faceSphere([0,0,-.06],[.70,.70,.30],gold,28,16);
-    for(let i=0;i<16;i+=1){
-      const a=i/16*TAU,r=.72;
-      const tangent=faceRight.map((n,j)=>n*Math.cos(a)-axes[1][j]*Math.sin(a));
-      const radial=faceRight.map((n,j)=>n*Math.sin(a)+axes[1][j]*Math.cos(a));
-      faceSphere([Math.sin(a)*r,Math.cos(a)*r,-.015],[.135,.235,.15],i%2?[.90,.42,.10]:[1,.58,.13],12,7,[tangent,radial,faceNormal]);
+    const faceSphere=(p,size,color,slices=20,bands=12)=>sphere(fp(p),size,color,slices,bands,faceAxes);
+    // Crossbones sit behind the head and emerge diagonally between the rays.
+    [[[-.87,-.80,-.22],[.87,.80,-.22]],[[-.87,.80,-.22],[.87,-.80,-.22]]].forEach(([a,b])=>{
+      rod(fp(a),fp(b),.065,ivory,10);
+      [a,b].forEach(p=>[-1,1].forEach(side=>faceSphere([p[0]+side*.052,p[1]-side*.047,p[2]],[.087,.087,.065],ivory,12,8)));
+    });
+    faceSphere([0,0,-.10],[.64,.64,.20],[.94,.57,.16],32,16);
+    for(let i=0;i<10;i+=1){
+      const angle=i/10*TAU;
+      const point=(t,u,back=false)=>{
+        const r=.48+.64*t,a=angle+.08+.30*t*t;
+        const half=.205*Math.pow(Math.max(0,Math.sin(Math.PI*(.20+.80*t))),.85);
+        return [Math.sin(a)*r+Math.cos(a)*half*u,Math.cos(a)*r-Math.sin(a)*half*u,
+          back?-.20:-.075+.10*Math.sin((u+1)*Math.PI/2)*Math.sin(t*Math.PI)+.035*t];
+      };
+      const normal=(t,u)=>{
+        const dt=subtract(point(Math.min(1,t+.001),u),point(Math.max(0,t-.001),u));
+        const du=subtract(point(t,Math.min(1,u+.001)),point(t,Math.max(-1,u-.001)));
+        const n=cross(du,dt);
+        return Math.hypot(...n)<.00000001?faceNormal:normalize(along([0,0,0],faceAxes,n));
+      };
+      const color=i%2?[.98,.43,.10]:[1,.53,.13];
+      for(let j=0;j<14;j+=1)for(let k=0;k<6;k+=1){
+        const t=j/14,T=(j+1)/14,u=k/3-1,U=(k+1)/3-1;
+        quad(hull,fp(point(t,u)),fp(point(t,U)),fp(point(T,U)),fp(point(T,u)),color,undefined,[normal(t,u),normal(t,U),normal(T,U),normal(T,u)]);
+      }
+      // Narrow darker edge surfaces make each flame a solid sculpted piece.
+      [-1,1].forEach(u=>{
+        for(let j=0;j<14;j+=1){const t=j/14,T=(j+1)/14;
+          quad(hull,fp(point(t,u)),fp(point(T,u)),fp(point(T,u,true)),fp(point(t,u,true)),[.79,.31,.07]);
+        }
+      });
     }
-    [-1,1].forEach(side=>{
-      faceSphere([side*.43,.43,.20],[.14,.16,.10],gold,16,8);
-      faceSphere([side*.43,.44,.28],[.078,.085,.035],[.85,.46,.25],12,6);
-    });
-    faceSphere([0,0,.20],[.52,.52,.235],ivory,32,20);
-    [-1,1].forEach(side=>{
-      faceSphere([side*.19,.12,.423],[.055,.070,.027],ink,16,10);
-      faceSphere([side*.18,.14,.449],[.013,.016,.008],ivory,8,5);
-      faceSphere([side*.17,-.12,.435],[.20,.135,.065],cream,20,10);
-      path(Array.from({length:9},(_,j)=>fp([side*.19+(j/8-.5)*.16,.24+.035*Math.sin(j/8*Math.PI),.395])),.015,wood);
-    });
-    triangle(hull,fp([-.075,-.045,.511]),fp([.075,-.045,.511]),fp([0,-.13,.531]),ink);
-    const smile=Array.from({length:17},(_,i)=>fp([Math.cos(Math.PI+i/16*Math.PI)*.265,-.15+Math.sin(Math.PI+i/16*Math.PI)*.17,.441]));
-    path(smile,.020,ink,8);rod(fp([0,-.12,.49]),fp([0,-.225,.49]),.015,ink,8);
-    [-1,1].forEach(side=>faceSphere([side*.34,-.07,.395],[.055,.027,.014],[.93,.63,.37],12,6));
-    // Bone-shaped white supports beneath the sunflower lion.
-    [[[-.49,-.65,.06],[.49,-.82,.06]],[[-.49,-.82,.06],[.49,-.65,.06]]].forEach(([a,b])=>{
-      rod(fp(a),fp(b),.052,ivory,10);[a,b].forEach(p=>faceSphere(p,[.085,.085,.068],ivory,12,8));
-    });
+    faceSphere([0,0,-.02],[.615,.615,.21],[.97,.81,.42],32,16);
+    const facePoint=(r,a)=>fp([Math.cos(a)*r*.60,Math.sin(a)*r*.60,.12+.27*Math.sqrt(Math.max(0,1-r*r))]);
+    const faceNormalAt=(r,a)=>normalize(along([0,0,0],faceAxes,[Math.cos(a)*r/.60,Math.sin(a)*r/.60,Math.sqrt(Math.max(0,1-r*r))/.27]));
+    const faceUV=(r,a)=>[.5+Math.cos(a)*r*.5,.5+Math.sin(a)*r*.5];
+    for(let i=0;i<64;i+=1)for(let j=0;j<20;j+=1){
+      const a=i/64*TAU,A=(i+1)/64*TAU,r=j/20,R=(j+1)/20;
+      quad(face,facePoint(r,a),facePoint(R,a),facePoint(R,A),facePoint(r,A),[1,1,1],
+        [faceUV(r,a),faceUV(R,a),faceUV(R,A),faceUV(r,A)],
+        [faceNormalAt(r,a),faceNormalAt(R,a),faceNormalAt(R,A),faceNormalAt(r,A)]);
+    }
     rod([-2.70,1.14,-.1],[-4.0,1.62,-.1],.055,wood,12,.025);
     path([[-4,1.62,-.1],[-3.5,.56,-.05],[-2.65,.4,0]],.018,rope);
 
@@ -381,12 +397,42 @@
     // The small pirate pennant uses the same printed emblem as the main sail.
     const flagPoint=(u,v)=>[-.72+u*1.05,6.06+v*.46-.055*Math.sin(u*Math.PI),.04+.09*Math.sin(u*5)];
     for(let i=0;i<12;i+=1)for(let j=0;j<4;j+=1){const u=i/12,U=(i+1)/12,v=j/4,V=(j+1)/4;quad(main,flagPoint(u,v),flagPoint(U,v),flagPoint(U,V),flagPoint(u,V),ink,[[u,v],[U,v],[U,V],[u,V]]);}
-    canvas.dataset.shipTriangles=String((hull.length+main.length+rear.length)/33);
-    return {hull,main,rear};
+    canvas.dataset.shipTriangles=String((hull.length+main.length+rear.length+face.length)/33);
+    return {hull,main,rear,face};
   }
   function upload(vertices) {
     const buffer = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, buffer); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
     return { buffer, count: vertices.length / 11 };
+  }
+  function makeLionFace() {
+    const image=document.createElement("canvas");image.width=512;image.height=512;
+    const c=image.getContext("2d");
+    if(c){
+      c.fillStyle="#f5d77e";c.fillRect(0,0,512,512);
+      // Canonical, graphic features: round eyes, one round pale muzzle and a
+      // generous smile. No brows, eye glints, cheek bulbs or realistic snout.
+      c.lineCap="round";c.lineJoin="round";
+      c.fillStyle="#fff6d7";c.strokeStyle="#8a542e";c.lineWidth=3.2;
+      c.beginPath();c.ellipse(256,311,101,99,0,0,Math.PI*2);c.fill();c.stroke();
+      [164,348].forEach(x=>{
+        c.fillStyle="#fff6d7";c.beginPath();c.arc(x,185,34,0,Math.PI*2);c.fill();
+        c.fillStyle="#342d24";c.beginPath();c.arc(x,185,27,0,Math.PI*2);c.fill();
+        c.strokeStyle="#8a542e";c.lineWidth=2.5;c.beginPath();c.arc(x,185,34,0,Math.PI*2);c.stroke();
+      });
+      c.fillStyle="#79502e";
+      c.beginPath();c.moveTo(235,242);c.quadraticCurveTo(256,229,277,242);
+      c.quadraticCurveTo(273,259,256,271);c.quadraticCurveTo(239,258,235,242);c.fill();
+      c.strokeStyle="#59432d";c.lineWidth=5.5;
+      c.beginPath();c.moveTo(184,322);c.bezierCurveTo(214,389,298,389,328,322);c.stroke();
+    }
+    const texture=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,texture);gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,true);
+    gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,image);
+    gl.generateMipmap(gl.TEXTURE_2D);
+    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR_MIPMAP_LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
+    return texture;
   }
   function makeFlag() {
     const image = document.createElement("canvas");
@@ -531,9 +577,16 @@
     if (location >= 0) { gl.enableVertexAttribArray(location); enabledAttributes.add(location); gl.vertexAttribPointer(location, size, gl.FLOAT, false, stride, offset); }
   }
   function cacheShipAnchor() {
+    const canvasRect = canvas.getBoundingClientRect();
+    canvasBounds = { left: canvasRect.left, top: canvasRect.top };
     if (!shipSpace) { shipAnchor = null; return; }
     const rect = shipSpace.getBoundingClientRect();
-    shipAnchor = { x: rect.left + rect.width * .5, y: rect.bottom - (width <= 560 ? 100 : 54), span: Math.min(rect.width * .82, 280) };
+    const span = Math.min(rect.width * .90, Math.max(80, rect.height - 105) * 1.04);
+    shipAnchor = {
+      x: rect.left - canvasRect.left + rect.width * .5 + span * .025,
+      y: rect.bottom - canvasRect.top - 90,
+      span,
+    };
   }
   function draw(t) {
     if (lost) return;
@@ -550,10 +603,10 @@
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, oceanMesh.index); gl.uniformMatrix4fv(sea.uniforms.uVP, false, vp);
     gl.uniform1f(sea.uniforms.uTime, t); gl.uniform3fv(sea.uniforms.uEye, eye); gl.uniform2f(sea.uniforms.uResolution, canvas.width, canvas.height);
     gl.drawElements(gl.TRIANGLES, oceanMesh.count, gl.UNSIGNED_SHORT, 0);
-    let bx = 8.8, bz = -10, boatScale = 1.32, drawShip = true;
-    if (mobile && shipAnchor) {
-      // Intersect the journal's boat position with the sea plane. Moving only
-      // clip-space Y makes an otherwise visible boat disappear behind the water.
+    let bx = 0, bz = -10, boatScale = 1, drawShip = Boolean(shipAnchor);
+    if (shipAnchor) {
+      // The ship's waterline is positioned in the scene's own canvas coordinates
+      // on every breakpoint. Real sea-plane placement preserves depth testing.
       const forward = normalize(subtract(target, eye));
       const right = normalize(cross(forward, [0, 1, 0]));
       const up = cross(right, forward);
@@ -567,16 +620,19 @@
         const position = eye.map((v, i) => v + ray[i] * distance);
         bx = position[0]; bz = position[2];
         const depth = dot(subtract(position, eye), forward);
-        boatScale = shipAnchor.span * depth * 2 / (height * f * 7.5);
+        boatScale = shipAnchor.span * depth * 2 / (height * f * 7.7);
       }
     }
     if (drawShip) {
-    const bob = Math.sin(bx * .34 + bz * .18 - t * .86) * .23 + Math.sin(t * 1.19) * .07;
-    const model = matrix.boat(bx, bob + .12, bz, .30 + px * .04, Math.sin(t * .86) * .025, Math.sin(t * .63) * .018, boatScale);
+    const bob = Math.sin(bx * .34 + bz * .18 - t * .86) * .19
+      + Math.sin(bx * -.19 + bz * .43 - t * 1.19) * .085
+      + Math.sin(bx * .77 + bz * .55 + t * 1.7) * .025;
+    const model = matrix.boat(bx, bob + .045, bz, .30 + px * .04, Math.sin(t * .86) * .018, Math.sin(t * .63) * .012, boatScale);
     useProgram(boat.id); gl.uniformMatrix4fv(boat.uniforms.uVP, false, vp); gl.uniformMatrix4fv(boat.uniforms.uModel, false, model);
     gl.uniform2f(boat.uniforms.uClipShift, 0, 0); gl.uniform1f(boat.uniforms.uTime, t); gl.uniform3fv(boat.uniforms.uEye, eye);
-    gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, flagTexture); gl.uniform1i(boat.uniforms.uFlag, 0);
-    [[hullMesh, 0, 0], [rearMesh, 0, 1], [sailMesh, 1, 1]].forEach(([mesh, textured, cloth]) => {
+    gl.activeTexture(gl.TEXTURE0); gl.uniform1i(boat.uniforms.uFlag, 0);
+    [[hullMesh, 0, 0, flagTexture], [rearMesh, 0, 1, flagTexture], [sailMesh, 1, 1, flagTexture], [faceMesh, 1, 0, faceTexture]].forEach(([mesh, textured, cloth, texture]) => {
+      gl.bindTexture(gl.TEXTURE_2D, texture);
       gl.bindBuffer(gl.ARRAY_BUFFER, mesh.buffer); bindAttribute(boat.id, "aPosition", 3, 44, 0); bindAttribute(boat.id, "aNormal", 3, 44, 12); bindAttribute(boat.id, "aColor", 3, 44, 24); bindAttribute(boat.id, "aUv", 2, 44, 36);
       gl.uniform1f(boat.uniforms.uTextured, textured); gl.uniform1f(boat.uniforms.uCloth, cloth); gl.drawArrays(gl.TRIANGLES, 0, mesh.count);
     });
@@ -585,7 +641,7 @@
     if (frame === 1) { root.classList.add("webgl-ocean-ready"); canvas.dataset.renderer = "webgl"; }
     if (frame === 1 || frame % 15 === 0) canvas.dataset.frameCount = String(frame);
   }
-  function sailing() { return !lost && !document.hidden && root.dataset.seaMotion === "sailing"; }
+  function sailing() { return !lost && inView && !document.hidden && root.dataset.seaMotion === "sailing"; }
   function tick(now) {
     request = 0;
     if (!sailing()) return;
@@ -598,7 +654,7 @@
     if (request) window.cancelAnimationFrame(request);
     request = 0; previous = 0;
     if (sailing()) request = window.requestAnimationFrame(tick);
-    else if (!lost && !document.hidden) draw(elapsed);
+    else if (!lost && inView && !document.hidden) draw(elapsed);
   }
   function resize() {
     const rect = canvas.getBoundingClientRect(); width = Math.max(rect.width, 1); height = Math.max(rect.height, 1); mobile = width < 801;
@@ -606,22 +662,34 @@
     const ratio = Math.min(window.devicePixelRatio || 1, mobile ? 1.25 : 1.5, Math.sqrt(2000000 / (width * height)));
     canvas.width = Math.max(1, Math.round(width * ratio)); canvas.height = Math.max(1, Math.round(height * ratio)); draw(elapsed);
   }
-  window.addEventListener("pointermove", event => { if (event.pointerType === "touch") return; tx = event.clientX / width * 2 - 1; ty = event.clientY / height * 2 - 1; }, { passive: true });
+  window.addEventListener("pointermove", event => {
+    if (event.pointerType === "touch") return;
+    const x = event.clientX - canvasBounds.left, y = event.clientY - canvasBounds.top;
+    if (x < 0 || x > width || y < 0 || y > height) { tx = 0; ty = 0; return; }
+    tx = x / width * 2 - 1; ty = y / height * 2 - 1;
+  }, { passive: true });
   document.addEventListener("pointerleave", () => { tx = 0; ty = 0; });
   window.addEventListener("scroll", () => {
     scrollTarget = Math.min(window.scrollY / Math.max(height, 1), 1);
-    if (mobile) {
-      cacheShipAnchor();
-      if (!sailing() && !document.hidden) sync();
-    }
+    cacheShipAnchor();
+    if (!sailing() && !document.hidden) sync();
   }, { passive: true });
   document.addEventListener("visibilitychange", sync);
+  if ("IntersectionObserver" in window) {
+    new IntersectionObserver(entries => {
+      inView = entries[0].isIntersecting;
+      sync();
+    }, { rootMargin: "80px" }).observe(canvas);
+  }
   if (reduced.addEventListener) reduced.addEventListener("change", sync); else reduced.addListener(sync);
   new MutationObserver(sync).observe(root, { attributes: true, attributeFilter: ["data-sea-motion"] });
   canvas.addEventListener("webglcontextlost", event => {
     event.preventDefault(); lost = true; if (request) window.cancelAnimationFrame(request); request = 0;
     root.classList.remove("webgl-ocean-ready"); canvas.dataset.renderer = "fallback";
   });
-  if ("ResizeObserver" in window) new ResizeObserver(resize).observe(canvas); else window.addEventListener("resize", resize, { passive: true });
+  if ("ResizeObserver" in window) {
+    const observer = new ResizeObserver(resize); observer.observe(canvas);
+    if (shipSpace) observer.observe(shipSpace);
+  } else window.addEventListener("resize", resize, { passive: true });
   resize(); sync();
 })();

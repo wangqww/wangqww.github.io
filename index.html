@@ -3,112 +3,131 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#f5f0e5">
-  <title>Qiwei Wang · A Researcher's Voyage</title>
+  <meta name="theme-color" content="#faf9f5">
+  <title>Qiwei Wang — A Researcher's Voyage</title>
   <meta name="description" content="Qiwei Wang (王歧伟), M.S. student at ShanghaiTech University. Exploring 3D vision, Gaussian Splatting, cross-view geometry, and hand-object interaction.">
-  <meta property="og:title" content="Qiwei Wang · A Researcher's Voyage">
-  <meta property="og:description" content="Charting the unseen. A voyage through 3D vision, reconstruction, and geometry.">
+  <meta property="og:title" content="Qiwei Wang — A Researcher's Voyage">
+  <meta property="og:description" content="A little curiosity. An endless ocean. Research in 3D vision, reconstruction, and geometry.">
   <meta property="og:image" content="https://wangqww.github.io/assets/voyage-hero.webp">
   <meta property="og:type" content="website">
   <link rel="icon" type="image/svg+xml" href="assets/jolly-roger.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display:ital@0;1&family=Pirata+One&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="onepiece.css">
-  <link rel="stylesheet" href="voyage.css">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="atlas.css?v=20261019">
+  <link rel="stylesheet" href="journal.css?v=20261019">
   <script src="script.js" defer></script>
   <script src="voyage-motion.js" defer></script>
-  <script src="ocean-scene.js" defer></script>
-  <noscript><style>.voyage-hud{display:none}.menu-toggle,.research-toolbar{display:none}.nav-links{display:flex;position:static;flex-direction:row;flex-wrap:wrap;box-shadow:none;border:0;padding:0;gap:12px;font-size:11px}.nav-shell{height:auto;min-height:69px;flex-wrap:wrap;padding-block:12px}.nav-links .nav-contact{padding:0;border:0}</style></noscript>
+  <script src="ocean-scene.js?v=20261019" defer></script>
+  <noscript><style>.ocean-controls,.menu-toggle,.aj-research-toolbar{display:none!important}.nav-links{display:flex!important;position:static!important;flex-wrap:wrap}.nav-shell{height:auto;min-height:76px;flex-wrap:wrap;padding-block:16px}.atlas-journal [data-reveal]{opacity:1;transform:none}</style></noscript>
 </head>
-<body>
-  <div class="ocean-world" aria-hidden="true">
-    <div class="ocean-fallback"></div>
-    <canvas id="ocean-canvas" aria-hidden="true"></canvas>
-    <div class="ocean-light"></div>
-    <div class="sea-birds"><svg viewBox="0 0 48 16"><path d="M2 12Q13 0 24 11Q35 0 46 12"/></svg><svg viewBox="0 0 48 16"><path d="M2 12Q13 0 24 11Q35 0 46 12"/></svg><svg viewBox="0 0 48 16"><path d="M2 12Q13 0 24 11Q35 0 46 12"/></svg></div>
-    <div class="sea-spray"><i style="--x:9%;--delay:-0.0s;--duration:9s"></i><i style="--x:22%;--delay:-1.7s;--duration:11s"></i><i style="--x:37%;--delay:-3.4s;--duration:13s"></i><i style="--x:51%;--delay:-5.1s;--duration:15s"></i><i style="--x:65%;--delay:-6.8s;--duration:9s"></i><i style="--x:79%;--delay:-8.5s;--duration:11s"></i><i style="--x:91%;--delay:-10.2s;--duration:13s"></i><i style="--x:16%;--delay:-11.9s;--duration:15s"></i><i style="--x:44%;--delay:-13.6s;--duration:9s"></i><i style="--x:71%;--delay:-15.299999999999999s;--duration:11s"></i></div>
-    <div id="sea-ripples"></div>
-  </div>
-
+<body class="atlas-site">
   <a class="skip-link" href="#main">Skip to content</a>
-  <header class="site-header"><div class="nav-shell">
-    <a class="brand" href="#home" aria-label="Qiwei Wang, home"><img class="crew-mark" src="assets/jolly-roger.svg" alt="" width="48" height="48"><span>QW<span class="brand-dot">.</span></span><span class="brand-note">STRAW HAT<br>RESEARCH LOG</span></a>
-    <button class="menu-toggle" type="button" aria-controls="site-nav" aria-expanded="false" aria-label="Toggle navigation"><span></span><span></span></button>
-    <nav id="site-nav" class="nav-links" aria-label="Main navigation"><a href="#about">About</a><a href="#research">Research</a><a href="#logbook">Logbook</a><a href="#contact" class="nav-contact">Say ahoy <span aria-hidden="true">↗</span></a></nav>
-  </div></header>
-  <main id="main">
-    <section id="home" class="hero wrap voyage-hero" aria-labelledby="hero-title">
-      <div class="hero-copy"><div class="sea-live-label"><span></span> A VOYAGE THROUGH 3D WORLDS</div><span class="manga-don" aria-hidden="true">ドン!!</span><p class="eyebrow"><img class="eyebrow-flag" src="assets/jolly-roger.svg" width="24" height="24" alt=""> STRAW HAT SPIRIT · RESEARCHER'S VOYAGE</p>
-        <h1 id="hero-title">Charting<br>the <em>unseen.</em></h1>
-        <p class="hero-description">From pixels to worlds.<br>Exploring 3D vision, one discovery at a time.</p>
-        <div class="hero-identity"><span class="identity-line"></span><div><p>Qiwei Wang <span lang="zh">王歧伟</span></p><span>M.S. Student · ShanghaiTech University</span></div></div>
-        <div class="hero-buttons"><a class="button button-red" href="#research">Explore my research <span aria-hidden="true">↗</span></a><a class="text-link" href="mailto:wangqw2024@shanghaitech.edu.cn">Get in touch <span aria-hidden="true">↗</span></a></div>
-      </div>
-      <div class="hero-art voyage-scene-space">
-        <div class="art-coordinates">THE GRAND LINE <span>FOLLOW YOUR CURIOSITY</span></div>
-        <div class="ship-caption"><span class="ship-caption-rule"></span><span>THOUSAND SUNNY<br><b>Bound for new discoveries.</b></span></div>
-        <div class="art-note"><span aria-hidden="true">✧</span> The sea keeps moving.<br><i>So do we.</i></div>
-      </div>
-      <div class="hero-bottom"><span>3D VISION · GEOMETRY · DISCOVERY</span><a href="#about">SCROLL TO EXPLORE <span aria-hidden="true">↓</span></a></div>
-    </section>
-    <div class="voyage-journal">
-    <div class="journal-binding" aria-hidden="true"><span>FIELD JOURNAL / QIWEI WANG</span><span>A NEW HORIZON, EVERY DAY</span></div>
-    <div class="ticker" aria-hidden="true"><div>EAST BLUE <span>✦</span> THE GRAND LINE <span>✦</span> ALL BLUE DREAMS <span>✦</span> THE NEW WORLD <span>✦</span> OUR ADVENTURE CONTINUES <span>✦</span></div></div>
-
-    <section class="mission-board wrap" data-reveal data-tilt aria-labelledby="mission-title">
-      <div class="mission-heading"><img src="assets/log-pose.svg" alt="" width="47" height="47"><div><p class="eyebrow">YOUR LOG POSE</p><h2 id="mission-title">Choose your next adventure.</h2></div><span class="quest-count" id="quest-progress" aria-live="polite">0 / 3 ports visited</span></div>
-      <div class="mission-grid">
-        <a class="mission" href="#about" data-mission="about"><span class="mission-index">01</span><span class="mission-copy"><small>EAST BLUE / ABOUT</small><strong>Meet the captain</strong><span>The person behind the research.</span></span><span class="mission-state" aria-label="Not yet visited">↗</span></a>
-        <a class="mission" href="#research" data-mission="research"><span class="mission-index">02</span><span class="mission-copy"><small>GRAND LINE / RESEARCH</small><strong>Hunt for discoveries</strong><span>Five expeditions into 3D vision.</span></span><span class="mission-state" aria-label="Not yet visited">↗</span></a>
-        <a class="mission" href="#contact" data-mission="contact"><span class="mission-index">03</span><span class="mission-copy"><small>NEW WORLD / CONTACT</small><strong>Send a signal</strong><span>A new collaboration starts here.</span></span><span class="mission-state" aria-label="Not yet visited">↗</span></a>
-      </div>
-    </section>
-    <section id="about" class="about wrap section-space" aria-labelledby="about-title">
-      <div class="wanted" data-reveal data-tilt><span class="pin" aria-hidden="true"></span><div class="wanted-title">WANTED</div><div class="wanted-subtitle">ALIVE &amp; ENDLESSLY CURIOUS</div><div class="portrait-frame"><img src="assets/photo.jpg" alt="Portrait of Qiwei Wang" width="400" height="400" loading="lazy"></div><div class="wanted-name">QIWEI WANG</div><div class="wanted-chinese" lang="zh">王歧伟</div><div class="wanted-rule"></div><div class="wanted-bottom">EXPLORER OF THE 3D WORLD</div><div class="wanted-bounty"><span aria-hidden="true">฿</span> 3D · VISION · DISCOVERY</div><span class="wanted-marine"><img src="assets/marine-mark.svg" alt="" width="23" height="23"> RESEARCH DIVISION</span></div>
-      <div class="about-copy" data-reveal><p class="eyebrow">01 / EAST BLUE · MEET THE CAPTAIN</p><h2 id="about-title">A little curiosity.<br><em>An endless ocean.</em></h2><p>Ahoy! I'm Qiwei, an M.S. student at <a href="https://www.shanghaitech.edu.cn/">ShanghaiTech University</a>, advised by <a href="https://yujiaoshi.github.io/">Prof. Yujiao Shi</a>.</p><p>I explore how machines can reconstruct and understand our 3D world—from satellite views and city streets to the hands we use to interact with it. Before this voyage, I received my B.Eng. from Harbin Institute of Technology and built web experiences at ByteDance.</p><div class="interest-label">ON MY COMPASS</div><ul class="interests"><li>3D Reconstruction</li><li>Gaussian Splatting</li><li>Novel View Synthesis</li><li>Cross-View Localization</li><li>Satellite / Drone / Ground Geometry</li><li>Hand-Object Interaction</li></ul><div class="social-links"><a href="mailto:wangqw2024@shanghaitech.edu.cn">Email <span aria-hidden="true">↗</span></a><a href="https://scholar.google.com.hk/citations?user=V61LSk0AAAAJ&amp;hl=zh-CN">Google Scholar <span aria-hidden="true">↗</span></a><a href="https://github.com/wangqww">GitHub <span aria-hidden="true">↗</span></a></div></div>
-    </section>
-    <section id="news" class="news-section wrap" data-reveal aria-labelledby="news-title"><div class="news-label"><span class="news-coo-mark" aria-hidden="true">号外</span><span class="eyebrow">NEWS COO DELIVERY</span><h2 id="news-title">Captain's notes<span>.</span></h2></div><div class="news-list"><div><time>2026</time><p><b>Cross3R</b> accepted to <strong>NeurIPS 2026</strong>.</p><span aria-hidden="true">↗</span></div><div><time>2026</time><p><b>CylinderSplat</b> accepted to <strong>ICLR 2026</strong>.</p><span aria-hidden="true">↗</span></div><details class="older-news"><summary>More from the log <span aria-hidden="true">+</span></summary><div><time>DEC 2025</time><p>Received University-Level Outstanding Student, ShanghaiTech University.</p></div><div><time>2025</time><p><b>BevSplat</b> accepted to <strong>NeurIPS 2025 · Spotlight</strong>.</p></div><div><time>2025</time><p>Controllable Satellite-to-Street-View Synthesis accepted to <strong>ICLR 2025</strong>.</p></div></details></div></section>
-    <span id="pubs" class="anchor-alias" aria-hidden="true"></span>
-    <section id="research" class="research wrap section-space" aria-labelledby="research-title"><div class="section-heading"><div><p class="eyebrow">02 / GRAND LINE · RESEARCH BOUNTIES</p><h2 id="research-title">Islands of <em>discovery.</em></h2></div><div class="section-emblem"><img src="assets/devil-fruit.svg" alt="" width="44" height="44"><p>Different perspectives.<br>A shared pursuit of 3D understanding.</p></div></div><div class="ohara-note" data-reveal data-tilt><div><span class="eyebrow">THE OHARA FIELD NOTES</span><p>Every island holds a mystery.<br><em>Every question opens a new world.</em></p><span class="note-caption">Research, with a little Straw Hat curiosity.</span></div><img src="assets/robin-chopper.webp" alt="Nico Robin and Chopper studying a nautical map together" width="768" height="512" loading="lazy"><span class="ohara-stamp" aria-hidden="true">ARCHIVE<br>OF DISCOVERY</span></div><div class="research-toolbar"><div class="filters" role="group" aria-label="Filter research by topic"><button type="button" class="is-active" data-filter="all" aria-pressed="true">All work <span>05</span></button><button type="button" data-filter="reconstruction" aria-pressed="false">3D Reconstruction</button><button type="button" data-filter="synthesis" aria-pressed="false">View Synthesis</button><button type="button" data-filter="localization" aria-pressed="false">Localization</button><button type="button" data-filter="interaction" aria-pressed="false">Hand–Object</button></div><div class="bearing-count"><img src="assets/log-pose.svg" alt="" width="24" height="24"><span id="result-count" aria-live="polite" aria-atomic="true">5 projects</span></div></div><div class="papers"><article class="paper" data-reveal data-tilt data-topics="reconstruction interaction" aria-labelledby="project-01">
-      <div class="paper-visual"><span class="project-number"><img src="assets/jolly-roger.svg" alt="" width="16" height="16"> EXPEDITION / 01</span><img src='assets/fig_stereohoi.jpg' alt='StereoHOI framework figure' loading='lazy' width="640" height="360"><span class="figure-caption">Metric hand–object reconstruction</span></div>
-      <div class="paper-content"><div class="paper-meta"><span class="venue review">UNDER REVIEW</span><span class="project-type">RESEARCH PAPER</span></div>
-      <h3 id="project-01">StereoHOI: Recover Metric Hand-Object Interaction from Egocentric Stereo Vision</h3><p class="authors"><b>Qiwei Wang</b>, Xiangting Meng, Xingxing Zuo, <a href='https://yujiaoshi.github.io/'>Yujiao Shi</a></p>
-      <div class="paper-actions"><details><summary>Abstract <span aria-hidden="true">+</span></summary><p>Recovers metric-scale 3D hand-object interaction from egocentric stereo images: fuses frozen hand-foundation-model priors with camera parameters, models stereo disparity via alternating cross-view attention, and predicts metric wrist translation and pose residuals, placing hand and object meshes in one metric frame.</p></details></div></div>
-    </article>
-<article class="paper" data-reveal data-tilt data-topics="reconstruction" aria-labelledby="project-02">
-      <div class="paper-visual"><span class="project-number"><img src="assets/jolly-roger.svg" alt="" width="16" height="16"> EXPEDITION / 02</span><img src='assets/fig_cross3r.jpg' alt='Seeing Across Skies and Streets teaser figure' loading='lazy' width="640" height="360"><span class="figure-caption">Satellite · drone · ground</span></div>
-      <div class="paper-content"><div class="paper-meta"><span class="venue ">NEURIPS 2026</span><span class="project-type">RESEARCH PAPER</span></div>
-      <h3 id="project-02">Seeing Across Skies and Streets: Feedforward 3D Reconstruction from Satellite, Drone, and Ground Images</h3><p class="authors"><b>Qiwei Wang</b>, Zhongyao Tuo, Xianghui Ze, <a href='https://yujiaoshi.github.io/'>Yujiao Shi</a></p>
-      <div class="paper-actions"><a href='https://arxiv.org/pdf/2605.07978'>Paper <span aria-hidden='true'>↗</span></a> <a href='https://github.com/eacsai/PI3_Sat'>Code <span aria-hidden='true'>↗</span></a><details><summary>Abstract <span aria-hidden="true">+</span></summary><p>Cross3R, a feedforward model that jointly processes satellite, drone, and ground images to directly regress full 3D structure and 6-DoF poses, beyond prior planar position and yaw estimation; also builds CrossGeo (85 locations worldwide, 278K images) and outperforms specialized methods zero-shot on KITTI.</p></details></div></div>
-    </article>
-<article class="paper" data-reveal data-tilt data-topics="synthesis reconstruction" aria-labelledby="project-03">
-      <div class="paper-visual"><span class="project-number"><img src="assets/jolly-roger.svg" alt="" width="16" height="16"> EXPEDITION / 03</span><img src='assets/fig_cylindersplat.jpg' alt='CylinderSplat teaser figure' loading='lazy' width="640" height="360"><span class="figure-caption">Panoramic novel view synthesis</span></div>
-      <div class="paper-content"><div class="paper-meta"><span class="venue ">ICLR 2026</span><span class="project-type">RESEARCH PAPER</span></div>
-      <h3 id="project-03">CylinderSplat: 3D Gaussian Splatting with Cylindrical Triplanes for Panoramic Novel View Synthesis</h3><p class="authors"><b>Qiwei Wang</b>, Xianghui Ze, Jingyi Yu, <a href='https://yujiaoshi.github.io/'>Yujiao Shi</a></p>
-      <div class="paper-actions"><a href='https://openreview.net/forum?id=lEzkct87Uy'>Paper <span aria-hidden='true'>↗</span></a> <a href='https://github.com/wangqww/CylinderSplat'>Code <span aria-hidden='true'>↗</span></a><details><summary>Abstract <span aria-hidden="true">+</span></summary><p>A feedforward 3D Gaussian Splatting framework that tackles the distortion and occlusion of equirectangular panoramas with a cylindrical triplane representation, decoupling azimuth and elevation to improve geometric consistency; achieves SOTA on single- and multi-view panoramic novel view synthesis.</p></details></div></div>
-    </article>
-<article class="paper" data-reveal data-tilt data-topics="localization" aria-labelledby="project-04">
-      <div class="paper-visual"><span class="project-number"><img src="assets/jolly-roger.svg" alt="" width="16" height="16"> EXPEDITION / 04</span><img src='assets/fig_bevsplat.jpg' alt='BevSplat teaser figure' loading='lazy' width="640" height="360"><span class="figure-caption">Weakly supervised cross-view localization</span></div>
-      <div class="paper-content"><div class="paper-meta"><span class="venue spotlight">NEURIPS 2025 · SPOTLIGHT</span><span class="project-type">RESEARCH PAPER</span></div>
-      <h3 id="project-04">BevSplat: Resolving Height Ambiguity via Feature-Based Gaussian Primitives for Weakly-Supervised Cross-View Localization</h3><p class="authors"><b>Qiwei Wang</b>, Shaoxun Wu, <a href='https://yujiaoshi.github.io/'>Yujiao Shi</a></p>
-      <div class="paper-actions"><a href='https://arxiv.org/pdf/2502.09080'>Paper <span aria-hidden='true'>↗</span></a> <a href='https://github.com/wangqww/BevSplat'>Code <span aria-hidden='true'>↗</span></a><details><summary>Abstract <span aria-hidden="true">+</span></summary><p>Weakly supervised cross-view localization that resolves ground-satellite height ambiguity: feature-based 3D Gaussian Splatting synthesizes geometrically consistent BEV features from ground images, aligned with satellite features to solve for pose; significantly outperforms prior weakly supervised methods on KITTI and VIGOR.</p></details></div></div>
-    </article>
-<article class="paper" data-reveal data-tilt data-topics="synthesis" aria-labelledby="project-05">
-      <div class="paper-visual"><span class="project-number"><img src="assets/jolly-roger.svg" alt="" width="16" height="16"> EXPEDITION / 05</span><img src='assets/fig_sat2street.jpg' alt='Controllable Satellite-to-Street-View Synthesis with Precise Pose Alignment and Zero-Shot Environmental Control teaser figure' loading='lazy' width="640" height="360"><span class="figure-caption">Controllable cross-view synthesis</span></div>
-      <div class="paper-content"><div class="paper-meta"><span class="venue ">ICLR 2025</span><span class="project-type">RESEARCH PAPER</span></div>
-      <h3 id="project-05">Controllable Satellite-to-Street-View Synthesis with Precise Pose Alignment and Zero-Shot Environmental Control</h3><p class="authors">Xianghui Ze, Zhenbo Song, <b>Qiwei Wang</b>, Jianfeng Lu, <a href='https://yujiaoshi.github.io/'>Yujiao Shi</a></p>
-      <div class="paper-actions"><a href='https://arxiv.org/pdf/2502.03498'>Paper <span aria-hidden='true'>↗</span></a> <a href='https://github.com/zexianghui/CS2S_pose_environment'>Code <span aria-hidden='true'>↗</span></a><details><summary>Abstract <span aria-hidden="true">+</span></summary><p>A diffusion-based method combining iterative homography adjustment with text-guided sampling for satellite-to-street-view synthesis, achieving zero-shot pose control and fine-grained control of weather, lighting, and season without target-scene data.</p></details></div></div>
-    </article></div><a class="scholar-link" href="https://scholar.google.com.hk/citations?user=V61LSk0AAAAJ&amp;hl=zh-CN">Find my work on Google Scholar <span aria-hidden="true">↗</span></a></section>
-    <section id="logbook" class="logbook section-space" aria-labelledby="logbook-title"><div class="wrap"><div class="section-heading"><div><p class="eyebrow">03 / THE GRAND LINE LOGBOOK</p><h2 id="logbook-title">Every port, <em>a new chapter.</em></h2></div><span class="compass-mark" aria-hidden="true"><img src="assets/log-pose.svg" alt="" width="76" height="76"></span></div><div class="journey-grid" data-reveal><div id="edu"><h3 class="column-title"><span aria-hidden="true">01</span> Education</h3><ol class="timeline"><li><time>SEP 2024 — MAY 2027</time><h4>ShanghaiTech University</h4><p>M.S. in Information and Communication Engineering</p><span>Shanghai, China</span></li><li><time>SEP 2018 — MAY 2022</time><h4>Harbin Institute of Technology</h4><p>B.Eng. in Measurement &amp; Control Technology and Instrumentation</p><span>Harbin, China</span></li></ol></div><div id="exp"><h3 class="column-title"><span aria-hidden="true">02</span> Experience</h3><ol class="timeline"><li><time>JUN 2022 — MAY 2023</time><h4>ByteDance</h4><p>Web Front-End Development Engineer</p><span>Shanghai, China</span></li><li><time>JUN 2021 — MAY 2022</time><h4>Meituan</h4><p>Web Front-End Development Engineer · Intern</p><span>Beijing, China</span></li></ol></div></div><div id="honors" class="honors" data-reveal><h3 class="column-title"><img src="assets/devil-fruit.svg" alt="" width="28" height="28"> Treasures along the way</h3><ul><li><span class="award-year">2025</span><div><h4>University-Level Outstanding Student</h4><p>ShanghaiTech University · December</p></div></li><li><span class="award-year">2021</span><div><h4>Outstanding Communist Youth League Member</h4><p>May Fourth Awards · Harbin Institute of Technology · May</p></div></li><li><span class="award-year">2021</span><div><h4>Five-Star Volunteer</h4><p>Harbin Institute of Technology · March</p></div></li></ul></div></div></section>
-    <section id="contact" class="contact wrap section-space" data-reveal aria-labelledby="contact-title"><img class="zoro-sticker" src="assets/zoro-sticker.webp" alt="Roronoa Zoro with green hair and three sheathed swords" width="512" height="768" loading="lazy"><p class="eyebrow">NEXT STOP · THE NEW WORLD</p><h2 id="contact-title">Let's <em>set sail.</em></h2><p>Have an idea, a question, or a shared curiosity?<br>I'd love to hear from you.</p><a class="contact-email" href="mailto:wangqw2024@shanghaitech.edu.cn">wangqw2024@shanghaitech.edu.cn <span aria-hidden="true">↗</span></a><span class="contact-flag" aria-hidden="true"><img src="assets/jolly-roger.svg" alt="" width="115" height="115"><span>NAKAMA WELCOME</span></span></section>
+  <header class="site-header">
+    <div class="nav-shell">
+      <a class="brand" href="#home" aria-label="Qiwei Wang, home"><img src="assets/jolly-roger.svg" alt="" width="42" height="42"><span>qiwei wang<span class="brand-dot">.</span></span></a>
+      <button class="menu-toggle" type="button" aria-controls="site-nav" aria-expanded="false" aria-label="Toggle navigation"><span></span><span></span></button>
+      <nav id="site-nav" class="nav-links" aria-label="Main navigation"><a href="#about">About</a><a href="#research">Research</a><a href="#logbook">Logbook</a><a href="#contact" class="nav-contact">Say hello <span aria-hidden="true">↗</span></a></nav>
     </div>
-  </main><footer class="site-footer wrap"><a class="footer-brand" href="#home"><img src="assets/jolly-roger.svg" alt="" width="35" height="35"><span>Qiwei Wang <small>© 2026</small></span></a><span class="footer-note">The adventure continues. To the New World!</span><div><a href="https://github.com/wangqww">GitHub <span aria-hidden="true">↗</span></a><a href="#home">Back to top ↑</a></div></footer>
+    <div class="reading-progress" aria-hidden="true"><span class="voyage-progress-fill"></span></div>
+  </header>
+  <main id="main">
+    <section id="home" class="voyage-hero" aria-labelledby="hero-title">
+      <div class="ocean-world" aria-hidden="true"><div class="ocean-fallback"></div><canvas id="ocean-canvas" aria-hidden="true"></canvas><div class="ocean-light"></div><div class="sea-birds"><svg viewBox="0 0 48 16"><path d="M2 12Q13 0 24 11Q35 0 46 12"/></svg><svg viewBox="0 0 48 16"><path d="M2 12Q13 0 24 11Q35 0 46 12"/></svg></div><div id="sea-ripples"></div></div>
+      <div class="hero-inner">
+        <div class="hero-copy">
+          <p class="hero-eyebrow"><span></span> A RESEARCHER'S VOYAGE</p>
+          <h1 id="hero-title">Qiwei Wang<span class="name-period">.</span></h1>
+          <p class="hero-chinese" lang="zh">王歧伟</p>
+          <p class="hero-tagline">A little curiosity.<br><em>An endless ocean.</em></p>
+          <p class="hero-description">Exploring how machines see, reconstruct,<br class="desktop-break"> and understand our three-dimensional world.</p>
+          <p class="hero-affiliation">M.S. Student <span>·</span> ShanghaiTech University</p>
+          <div class="hero-buttons"><a class="button button-primary" href="#research">Explore my research <span aria-hidden="true">↗</span></a><a class="hero-email" href="mailto:wangqw2024@shanghaitech.edu.cn">Get in touch <span aria-hidden="true">↗</span></a></div>
+          <div class="hero-footnote"><span class="fine-rule"></span><span>3D VISION &nbsp; / &nbsp; GEOMETRY &nbsp; / &nbsp; DISCOVERY</span></div>
+        </div>
+        <div class="voyage-scene-space">
+          <div class="scene-caption"><div><span class="scene-overline">THE THOUSAND SUNNY</span><p>Onwards, to new horizons.</p></div><div class="ocean-controls"><button id="sea-motion-toggle" type="button" aria-pressed="false" aria-label="Toggle ocean motion"><svg class="motion-icon-pause" viewBox="0 0 20 20" aria-hidden="true"><path d="M7 5v10M13 5v10"/></svg><svg class="motion-icon-play" viewBox="0 0 20 20" aria-hidden="true"><path d="m7 4 9 6-9 6Z"/></svg><span data-motion-label>Resume motion</span></button></div></div>
+        </div>
+      </div>
+      <div class="hero-coast" aria-hidden="true"><svg viewBox="0 0 1440 60" preserveAspectRatio="none"><path d="M0 35C240 5 480 66 720 34S1200 14 1440 34V60H0Z"/></svg></div>
+    </section>
+    <section class="port-nav" aria-label="Your next destination">
+      <div class="port-heading"><img src="assets/log-pose.svg" alt="" width="45" height="45"><div><span>FOLLOW YOUR LOG POSE</span><p>Your next destination</p></div><span id="quest-progress" class="port-progress" aria-live="polite">0 / 3 ports visited</span></div>
+      <div class="ports"><a class="mission" href="#about" data-mission="about"><span class="port-number">01</span><span><small>EAST BLUE</small><strong>A little about me</strong></span><span class="mission-state" aria-label="Not yet visited">↗</span></a><a class="mission" href="#research" data-mission="research"><span class="port-number">02</span><span><small>THE GRAND LINE</small><strong>Islands of discovery</strong></span><span class="mission-state" aria-label="Not yet visited">↗</span></a><a class="mission" href="#contact" data-mission="contact"><span class="port-number">03</span><span><small>THE NEW WORLD</small><strong>Meet a new nakama</strong></span><span class="mission-state" aria-label="Not yet visited">↗</span></a></div>
+    </section>
+    <div class="atlas-journal">
+  <section id="about" class="aj-about aj-container" aria-labelledby="about-title" data-reveal>
+    <div class="aj-profile">
+      <figure class="aj-profile-figure"><div class="aj-portrait"><img src="assets/photo.jpg" alt="Portrait of Qiwei Wang" width="400" height="400" loading="lazy"></div><figcaption><strong>Qiwei Wang</strong><span lang="zh">王歧伟</span></figcaption></figure>
+      <p class="aj-profile-location">ShanghaiTech University · Shanghai</p>
+    </div>
+    <div class="aj-about-copy"><p class="aj-kicker">01 / MEET THE NAVIGATOR</p><h2 id="about-title">Curiosity is<br>my compass.</h2>
+      <p>Ahoy! I'm Qiwei, an M.S. student at <a href="https://www.shanghaitech.edu.cn/">ShanghaiTech University</a>, advised by <a href="https://yujiaoshi.github.io/">Prof. Yujiao Shi</a>.</p>
+      <p>I explore how machines can reconstruct and understand our 3D world—from satellite views and city streets to the hands we use to interact with it. Before this voyage, I received my B.Eng. from Harbin Institute of Technology and built web experiences at ByteDance.</p>
 
-  <aside class="voyage-hud" aria-label="Ocean motion controls">
-    <div class="voyage-compass" id="voyage-compass" aria-hidden="true"><span>N</span><i></i><b>✦</b></div>
-    <div class="voyage-tracker"><span id="voyage-distance">00% of the voyage</span><div class="voyage-progress-track"><span class="voyage-progress-fill"></span></div></div>
-    <button id="sea-motion-toggle" type="button" aria-pressed="false" aria-label="Toggle ocean motion"><svg class="motion-icon-pause" viewBox="0 0 20 20" aria-hidden="true"><path d="M6 4v12M14 4v12"/></svg><svg class="motion-icon-play" viewBox="0 0 20 20" aria-hidden="true"><path d="m6 3 11 7-11 7Z"/></svg><span data-motion-label>Resume motion</span></button>
-  </aside>
-</body></html>
+      <ul class="aj-interests"><li>3D Reconstruction</li><li>Gaussian Splatting</li><li>Novel View Synthesis</li><li>Cross-View Localization</li><li>Satellite / Drone / Ground Geometry</li><li>Hand-Object Interaction</li></ul>
+      <div class="aj-social-links"><a href="mailto:wangqw2024@shanghaitech.edu.cn">Email <span aria-hidden="true">↗</span></a><a href="https://scholar.google.com.hk/citations?user=V61LSk0AAAAJ&amp;hl=zh-CN">Google Scholar <span aria-hidden="true">↗</span></a><a href="https://github.com/wangqww">GitHub <span aria-hidden="true">↗</span></a></div>
+    </div>
+  </section>
+  <section id="news" class="aj-news aj-container" aria-labelledby="news-title" data-reveal>
+    <div><p class="aj-kicker">FROM THE LOGBOOK</p><h2 id="news-title">Latest notes.</h2></div>
+    <div class="aj-news-list"><div><time>2026</time><p><b>Cross3R</b> accepted to <strong>NeurIPS 2026</strong>.</p></div><div><time>2026</time><p><b>CylinderSplat</b> accepted to <strong>ICLR 2026</strong>.</p></div><details class="aj-news-older"><summary>More from the log <span aria-hidden="true">+</span></summary><div><time>DEC 2025</time><p>Received University-Level Outstanding Student, ShanghaiTech University.</p></div><div><time>2025</time><p><b>BevSplat</b> accepted to <strong>NeurIPS 2025 · Spotlight</strong>.</p></div><div><time>2025</time><p>Controllable Satellite-to-Street-View Synthesis accepted to <strong>ICLR 2025</strong>.</p></div></details></div>
+  </section>
+  <span id="pubs" class="anchor-alias" aria-hidden="true"></span>
+  <section id="research" class="aj-research aj-container" aria-labelledby="research-title">
+    <div class="aj-section-heading" data-reveal><div><p class="aj-kicker">02 / THE GRAND LINE</p><h2 id="research-title">Islands of discovery.</h2><p class="aj-section-intro">Different perspectives. A shared pursuit of 3D understanding.</p></div><img class="aj-research-vignette" src="assets/robin-chopper.webp" alt="Nico Robin and Chopper studying a nautical map together" width="768" height="512" loading="lazy"></div>
+    <div class="aj-research-toolbar"><div class="filters" role="group" aria-label="Filter research by topic"><button type="button" class="is-active" data-filter="all" aria-pressed="true">All work <span>05</span></button><button type="button" data-filter="reconstruction" aria-pressed="false">3D Reconstruction</button><button type="button" data-filter="synthesis" aria-pressed="false">View Synthesis</button><button type="button" data-filter="localization" aria-pressed="false">Localization</button><button type="button" data-filter="interaction" aria-pressed="false">Hand–Object</button></div><span id="result-count" aria-live="polite" aria-atomic="true">5 projects</span></div>
+    <div class="aj-papers">
+      <article class="paper aj-featured" data-topics="reconstruction interaction" aria-labelledby="project-01" data-reveal>
+        <figure class="aj-paper-image"><img src='assets/fig_stereohoi.jpg' alt='StereoHOI framework figure' loading='lazy' width="640" height="360"><figcaption><span>Metric hand–object reconstruction</span><span class="aj-paper-number" aria-hidden="true">01</span></figcaption></figure>
+        <div class="aj-paper-copy"><div class="aj-paper-meta"><span class="aj-venue aj-under-review">UNDER REVIEW</span></div>
+          <h3 id="project-01">StereoHOI: Recover Metric Hand-Object Interaction from Egocentric Stereo Vision</h3><p class="authors"><b>Qiwei Wang</b>, Xiangting Meng, Xingxing Zuo, <a href='https://yujiaoshi.github.io/'>Yujiao Shi</a></p>
+          <div class="paper-actions"><details><summary>Abstract <span aria-hidden="true">+</span></summary><p>Recovers metric-scale 3D hand-object interaction from egocentric stereo images: fuses frozen hand-foundation-model priors with camera parameters, models stereo disparity via alternating cross-view attention, and predicts metric wrist translation and pose residuals, placing hand and object meshes in one metric frame.</p></details></div>
+        </div>
+      </article>
+      <article class="paper" data-topics="reconstruction" aria-labelledby="project-02" data-reveal>
+        <figure class="aj-paper-image"><img src='assets/fig_cross3r.jpg' alt='Seeing Across Skies and Streets teaser figure' loading='lazy' width="640" height="360"><figcaption><span>Satellite · drone · ground</span><span class="aj-paper-number" aria-hidden="true">02</span></figcaption></figure>
+        <div class="aj-paper-copy"><div class="aj-paper-meta"><span class="aj-venue">NEURIPS 2026</span></div>
+          <h3 id="project-02">Seeing Across Skies and Streets: Feedforward 3D Reconstruction from Satellite, Drone, and Ground Images</h3><p class="authors"><b>Qiwei Wang</b>, Zhongyao Tuo, Xianghui Ze, <a href='https://yujiaoshi.github.io/'>Yujiao Shi</a></p>
+          <div class="paper-actions"><a href='https://arxiv.org/pdf/2605.07978'>Paper <span aria-hidden='true'>↗</span></a> <a href='https://github.com/eacsai/PI3_Sat'>Code <span aria-hidden='true'>↗</span></a><details><summary>Abstract <span aria-hidden="true">+</span></summary><p>Cross3R, a feedforward model that jointly processes satellite, drone, and ground images to directly regress full 3D structure and 6-DoF poses, beyond prior planar position and yaw estimation; also builds CrossGeo (85 locations worldwide, 278K images) and outperforms specialized methods zero-shot on KITTI.</p></details></div>
+        </div>
+      </article>
+      <article class="paper" data-topics="synthesis reconstruction" aria-labelledby="project-03" data-reveal>
+        <figure class="aj-paper-image"><img src='assets/fig_cylindersplat.jpg' alt='CylinderSplat teaser figure' loading='lazy' width="640" height="360"><figcaption><span>Panoramic novel view synthesis</span><span class="aj-paper-number" aria-hidden="true">03</span></figcaption></figure>
+        <div class="aj-paper-copy"><div class="aj-paper-meta"><span class="aj-venue">ICLR 2026</span></div>
+          <h3 id="project-03">CylinderSplat: 3D Gaussian Splatting with Cylindrical Triplanes for Panoramic Novel View Synthesis</h3><p class="authors"><b>Qiwei Wang</b>, Xianghui Ze, Jingyi Yu, <a href='https://yujiaoshi.github.io/'>Yujiao Shi</a></p>
+          <div class="paper-actions"><a href='https://openreview.net/forum?id=lEzkct87Uy'>Paper <span aria-hidden='true'>↗</span></a> <a href='https://github.com/wangqww/CylinderSplat'>Code <span aria-hidden='true'>↗</span></a><details><summary>Abstract <span aria-hidden="true">+</span></summary><p>A feedforward 3D Gaussian Splatting framework that tackles the distortion and occlusion of equirectangular panoramas with a cylindrical triplane representation, decoupling azimuth and elevation to improve geometric consistency; achieves SOTA on single- and multi-view panoramic novel view synthesis.</p></details></div>
+        </div>
+      </article>
+      <article class="paper" data-topics="localization" aria-labelledby="project-04" data-reveal>
+        <figure class="aj-paper-image"><img src='assets/fig_bevsplat.jpg' alt='BevSplat teaser figure' loading='lazy' width="640" height="360"><figcaption><span>Weakly supervised cross-view localization</span><span class="aj-paper-number" aria-hidden="true">04</span></figcaption></figure>
+        <div class="aj-paper-copy"><div class="aj-paper-meta"><span class="aj-venue">NEURIPS 2025 · SPOTLIGHT</span></div>
+          <h3 id="project-04">BevSplat: Resolving Height Ambiguity via Feature-Based Gaussian Primitives for Weakly-Supervised Cross-View Localization</h3><p class="authors"><b>Qiwei Wang</b>, Shaoxun Wu, <a href='https://yujiaoshi.github.io/'>Yujiao Shi</a></p>
+          <div class="paper-actions"><a href='https://arxiv.org/pdf/2502.09080'>Paper <span aria-hidden='true'>↗</span></a> <a href='https://github.com/wangqww/BevSplat'>Code <span aria-hidden='true'>↗</span></a><details><summary>Abstract <span aria-hidden="true">+</span></summary><p>Weakly supervised cross-view localization that resolves ground-satellite height ambiguity: feature-based 3D Gaussian Splatting synthesizes geometrically consistent BEV features from ground images, aligned with satellite features to solve for pose; significantly outperforms prior weakly supervised methods on KITTI and VIGOR.</p></details></div>
+        </div>
+      </article>
+      <article class="paper" data-topics="synthesis" aria-labelledby="project-05" data-reveal>
+        <figure class="aj-paper-image"><img src='assets/fig_sat2street.jpg' alt='Controllable Satellite-to-Street-View Synthesis with Precise Pose Alignment and Zero-Shot Environmental Control teaser figure' loading='lazy' width="640" height="360"><figcaption><span>Controllable cross-view synthesis</span><span class="aj-paper-number" aria-hidden="true">05</span></figcaption></figure>
+        <div class="aj-paper-copy"><div class="aj-paper-meta"><span class="aj-venue">ICLR 2025</span></div>
+          <h3 id="project-05">Controllable Satellite-to-Street-View Synthesis with Precise Pose Alignment and Zero-Shot Environmental Control</h3><p class="authors">Xianghui Ze, Zhenbo Song, <b>Qiwei Wang</b>, Jianfeng Lu, <a href='https://yujiaoshi.github.io/'>Yujiao Shi</a></p>
+          <div class="paper-actions"><a href='https://arxiv.org/pdf/2502.03498'>Paper <span aria-hidden='true'>↗</span></a> <a href='https://github.com/zexianghui/CS2S_pose_environment'>Code <span aria-hidden='true'>↗</span></a><details><summary>Abstract <span aria-hidden="true">+</span></summary><p>A diffusion-based method combining iterative homography adjustment with text-guided sampling for satellite-to-street-view synthesis, achieving zero-shot pose control and fine-grained control of weather, lighting, and season without target-scene data.</p></details></div>
+        </div>
+      </article>
+    </div>
+    <a class="aj-scholar-link" href="https://scholar.google.com.hk/citations?user=V61LSk0AAAAJ&amp;hl=zh-CN">More on Google Scholar <span aria-hidden="true">↗</span></a>
+  </section>
+  <section id="logbook" class="aj-logbook" aria-labelledby="logbook-title"><div class="aj-container">
+    <div class="aj-section-heading" data-reveal><div><p class="aj-kicker">03 / PORTS ALONG THE WAY</p><h2 id="logbook-title">A voyage in progress.</h2></div><img class="aj-log-pose" src="assets/log-pose.svg" alt="" width="64" height="64"></div>
+    <div class="aj-journey-grid" data-reveal><div id="edu"><h3 class="aj-column-title">Education</h3><ol class="aj-timeline"><li><time>SEP 2024 — MAY 2027</time><h4>ShanghaiTech University</h4><p>M.S. in Information and Communication Engineering</p><span>Shanghai, China</span></li><li><time>SEP 2018 — MAY 2022</time><h4>Harbin Institute of Technology</h4><p>B.Eng. in Measurement &amp; Control Technology and Instrumentation</p><span>Harbin, China</span></li></ol></div><div id="exp"><h3 class="aj-column-title">Experience</h3><ol class="aj-timeline"><li><time>JUN 2022 — MAY 2023</time><h4>ByteDance</h4><p>Web Front-End Development Engineer</p><span>Shanghai, China</span></li><li><time>JUN 2021 — MAY 2022</time><h4>Meituan</h4><p>Web Front-End Development Engineer · Intern</p><span>Beijing, China</span></li></ol></div></div>
+    <div id="honors" class="aj-honors" data-reveal><h3 class="aj-column-title">A few treasures along the way</h3><ul><li><span class="award-year">2025</span><div><h4>University-Level Outstanding Student</h4><p>ShanghaiTech University · December</p></div></li><li><span class="award-year">2021</span><div><h4>Outstanding Communist Youth League Member</h4><p>May Fourth Awards · Harbin Institute of Technology · May</p></div></li><li><span class="award-year">2021</span><div><h4>Five-Star Volunteer</h4><p>Harbin Institute of Technology · March</p></div></li></ul></div>
+  </div></section>
+  <section id="contact" class="aj-contact aj-container" aria-labelledby="contact-title" data-reveal>
+    <div class="aj-contact-copy"><p class="aj-kicker">THE NEXT CHAPTER</p><h2 id="contact-title">Let's set sail.</h2><p>Have an idea, a question, or a shared curiosity?<br>I'd love to hear from you.</p><a class="aj-contact-email" href="mailto:wangqw2024@shanghaitech.edu.cn">wangqw2024@shanghaitech.edu.cn <span aria-hidden="true">↗</span></a></div>
+    <div class="aj-contact-art"><div class="aj-contact-orbit" aria-hidden="true"></div><img src="assets/zoro-sticker.webp" alt="Roronoa Zoro with green hair and three sheathed swords" width="512" height="768" loading="lazy"><span class="aj-nakama-note">ROOM FOR ONE MORE NAKAMA.</span></div>
+  </section>
+</div>
+
+  </main>
+  <footer class="site-footer"><a href="#home" class="footer-brand"><img src="assets/jolly-roger.svg" alt="" width="30" height="30"><span>Qiwei Wang <small>© 2026</small></span></a><span>The adventure continues.</span><div><a href="https://github.com/wangqww">GitHub ↗</a><a href="#home">Back to top ↑</a></div></footer>
+</body>
+</html>
