@@ -8,7 +8,6 @@
 .atlas-journal .scene-promise .aj-section-heading{min-height:350px;margin-bottom:30px;align-items:center}
 .atlas-journal .scene-promise .aj-section-heading>div{max-width:490px}
 .atlas-journal .scene-promise .aj-section-intro{max-width:370px}
-.atlas-journal .scene-promise .aj-research-vignette{width:112px;max-height:100px;position:absolute;right:0;bottom:-8px;opacity:.95}
 .atlas-journal .scene-promise .aj-research-toolbar{position:relative;padding-top:24px;background:linear-gradient(90deg,#faf9f5f5,#faf9f5d9);border-radius:12px 12px 0 0}
 .op-strawhat-charm{position:absolute;right:-22px;top:8px;width:70px;height:82px;pointer-events:none;transform:rotate(calc(var(--deck-travel,0)*5deg));transform-origin:60% 0;transition:transform .2s linear;filter:drop-shadow(0 4px 6px #3f473322)}
 .atlas-journal .scene-nakama{padding-top:40px;background:#f0f4ef}
@@ -28,9 +27,6 @@
 .scene-merry .chapter-scenery::after{background:linear-gradient(90deg,#f5f0e8 0%,#f5f0e8fa 23%,#f5f0e8b0 41%,#f5f0e800 66%),linear-gradient(0deg,#12384529,transparent 40%)}
 .atlas-journal .scene-merry .aj-contact-copy{max-width:440px}
 .atlas-journal .scene-merry .aj-contact-copy>p:not(.aj-kicker){color:#4c6668}
-.atlas-journal .scene-merry .aj-contact-art{z-index:1;align-self:end;min-height:240px}
-.atlas-journal .scene-merry .aj-contact-art>img{width:150px;height:245px;left:auto;right:-30px;bottom:-52px;filter:drop-shadow(0 9px 10px #12384540)}
-.atlas-journal .scene-merry .aj-contact-orbit,.atlas-journal .scene-merry .aj-nakama-note{display:none}
 @media(min-width:1800px){.atlas-journal .scene-promise .chapter-scenery>img,.atlas-journal .scene-nakama .chapter-scenery>img{width:75%;object-position:50% 55%}}
 @media(max-width:1100px){
  .atlas-journal .scene-promise .aj-section-heading>div,.atlas-journal .scene-nakama .aj-section-heading>div{max-width:390px}
@@ -46,7 +42,6 @@
  .atlas-journal .scene-nakama .aj-journey-grid{padding:28px 24px;gap:30px}
  .atlas-journal .scene-merry{padding:42px 28px;min-height:470px;grid-template-columns:minmax(0,1fr) 100px}
  .atlas-journal .scene-merry .aj-contact-copy{max-width:330px}
- .atlas-journal .scene-merry .aj-contact-art>img{width:125px;height:210px;right:-16px;bottom:-40px}
  .op-strawhat-charm{right:0;width:52px;height:65px}
 }
 @media(max-width:560px){
@@ -57,7 +52,6 @@
  .scene-promise .chapter-scenery{top:190px;height:295px}
  .atlas-journal .scene-promise .chapter-scenery>img{width:100%;height:100%;top:0;object-fit:cover;object-position:50% 50%}
  .scene-promise .chapter-scenery::after{background:linear-gradient(0deg,var(--paper),transparent 28%,transparent 76%,var(--paper)),linear-gradient(90deg,#faf9f54d,transparent 20%,transparent 80%,#faf9f54d)}
- .atlas-journal .scene-promise .aj-research-vignette{width:82px;max-height:64px;bottom:2px;right:-4px}
  .atlas-journal .scene-promise .aj-research-toolbar{padding-top:16px;background:var(--paper)}
  .op-strawhat-charm{width:38px;height:50px;top:-14px;right:-3px}
  .atlas-journal .scene-nakama{padding-top:45px}
@@ -77,8 +71,6 @@
  .scene-merry .chapter-scenery{top:auto;bottom:0;height:335px}
  .atlas-journal .scene-merry .chapter-scenery>img{width:100%;height:100%;top:0;object-fit:cover;object-position:57% 50%}
  .scene-merry .chapter-scenery::after{background:linear-gradient(180deg,#f5f0e8,transparent 27%,transparent 90%,#12384522)}
- .atlas-journal .scene-merry .aj-contact-art{position:absolute;bottom:12px;right:10px;width:100px;min-height:165px}
- .atlas-journal .scene-merry .aj-contact-art>img{width:105px;height:165px;bottom:0;right:0}
 }
 html[data-sea-motion=paused] .atlas-journal .chapter-scenery>img,html[data-sea-motion=paused] .op-strawhat-charm,html[data-sea-motion=paused] .op-vivre-charm{transform:none;transition:none}
 @media(prefers-reduced-motion:reduce){.atlas-journal .chapter-scenery>img,.op-strawhat-charm,.op-vivre-charm{transform:none;transition:none}}
