@@ -458,8 +458,11 @@
     for(let i=0;i<8;i+=1){const a=i/8*TAU;rod([-1.9,1.61,.61],[-1.9+Math.cos(a)*.29,1.61+Math.sin(a)*.29,.61],.015,gold,6);}
     sphere([-1.9,1.61,.63],[.065,.065,.028],gold,12,6);
     // Tangerine grove on a little stern balcony, with visible individual fruit.
-    box(2.53,1.54,-.42,.79,.12,1.20,wood);
-    [[2.45,-.80],[2.80,-.38],[2.48,.02]].forEach(([x,z],i)=>{
+    box(2.50,1.54,-1.12,1.00,.12,.98,wood);
+    [2.08,2.92].forEach(x=>rod([x,1.04,-.70],[x,1.49,-1.52],.035,darkWood,8));
+    [2.04,2.50,2.96].forEach(x=>rod([x,1.60,-1.62],[x,1.85,-1.62],.018,cream,6));
+    rod([2.02,1.85,-1.62],[2.98,1.85,-1.62],.025,gold,8);
+    [[2.24,-1.16],[2.76,-1.16],[2.50,-1.48]].forEach(([x,z],i)=>{
       rod([x,1.6,z],[x,2.17+i*.06,z],.035,wood,8);
       [[0,.08,0],[-.14,-.02,.02],[.13,0,.04],[0,-.03,-.13]].forEach(([dx,dy,dz],j)=>sphere([x+dx,2.23+dy+i*.06,z+dz],[.22,.22,.20],j%2?[.22,.43,.15]:[.32,.54,.19],12,7));
       for(let j=0;j<4;j+=1){const a=j/4*TAU+i;sphere([x+Math.cos(a)*.19,2.19+(j%2)*.13+i*.06,z+Math.sin(a)*.19],[.045,.047,.045],[1,.49,.09],8,5);}
@@ -520,31 +523,43 @@
         [faceUV(r,a),faceUV(R,a),faceUV(R,A),faceUV(r,A)],
         [faceNormalAt(r,a),faceNormalAt(R,a),faceNormalAt(R,A),faceNormalAt(r,A)]);
     }
-    rod([-2.70,1.14,-.1],[-4.0,1.62,-.1],.055,wood,12,.025);
-    path([[-4,1.62,-.1],[-3.5,.56,-.05],[-2.65,.4,0]],.018,rope);
+    // The bowsprit runs behind the sculpted head, with its own outboard mount.
+    rod([-2.62,1.10,-.65],[-3.02,1.25,-1.05],.045,wood,10,.035);
+    rod([-2.70,1.14,-1.05],[-4.0,1.62,-1.05],.055,wood,12,.025);
+    path([[-4,1.62,-1.05],[-3.5,.56,-1.0],[-2.65,.4,-.65]],.018,rope);
 
     // Tapered masts, brass bindings, yardarms and a proper lookout basket.
-    rod([-.72,.98,0],[-.72,6.50,0],.11,wood,16,.048);
+    rod([-.72,.98,0],[-.72,6.78,0],.11,wood,16,.048);
     rod([1.52,1.05,-.12],[1.52,4.98,-.12],.073,wood,12,.035);
     for(let y=1.3;y<6;y+=.65)ring([-.72,y,0],[0,1,0],.097-y*.006,.012,gold,12);
-    rod([-2.94,5.49,.04],[1.50,5.49,.04],.065,wood,12,.055);
-    rod([.15,4.50,-.06],[2.89,4.50,-.06],.049,wood,10);
+    // Each spar and its ties share the cloth's attachment plane. Short braces
+    // connect the offset spars to the masts above the heads of the sails.
+    rod([-2.94,5.49,.94],[1.50,5.49,.94],.065,wood,12,.055);
+    rod([-.72,5.49,0],[-.72,5.49,.94],.045,wood,10);
+    [-1.80,.36].forEach(x=>rod([-.72,5.85,0],[x,5.49,.94],.018,rope,6));
+    rod([.15,4.50,-.80],[2.89,4.50,-.80],.049,wood,10);
+    rod([1.52,4.50,-.12],[1.52,4.50,-.80],.035,wood,8);
+    [.92,2.12].forEach(x=>rod([1.52,4.80,-.12],[x,4.50,-.80],.015,rope,6));
     rod([-.72,5.77,0],[-.72,5.99,0],.29,wood,24,.36);
     ring([-.72,5.99,0],[0,1,0],.36,.045,gold,24);
     ring([-.72,6.17,0],[0,1,0],.36,.025,cream,24);
     for(let i=0;i<10;i+=1){const a=i/10*TAU;rod([-.72+Math.cos(a)*.35,5.97,Math.sin(a)*.35],[-.72+Math.cos(a)*.35,6.17,Math.sin(a)*.35],.015,cream,5);}
     // Standing rigging and ratlines are behind the billowing cloth.
-    path([[-4.0,1.62,-.1],[-.72,6.31,-.12],[2.90,1.30,-.35]],.017,rope);
+    // The main backstay lands on the gunwale ahead of the cabin; stern-bound
+    // lines would otherwise cut through both storeys and their roof eaves.
+    path([[-4.0,1.62,-1.05],[-.72,6.31,-.12],hullPoint(-1.35,1.15,.975)],.017,rope);
     [-1,1].forEach(side=>{
       const top=[-.72,5.75,-.10],left=[-1.75,1.10,side*.98],right=[.34,1.10,side*.98];
       [left,right,[-.72,1.10,side*1.04]].forEach(p=>rod(p,top,.013,rope,5));
       for(let i=1;i<14;i+=1){const f=i/15;path([left.map((v,j)=>v+(top[j]-v)*f),right.map((v,j)=>v+(top[j]-v)*f)],.0085,rope,4);}
-      rod([1.52,4.91,-.12],[2.65,1.34,side*.67],.013,rope,5);
+      const chainplate=[.70,1.08,side*.74];
+      rod([chainplate[0],1.015,chainplate[2]],[chainplate[0],1.10,chainplate[2]],.035,gold,8);
+      rod([1.52,4.91,-.12],chainplate,.013,rope,5);
     });
-    function sail(out,center,bottom,top,halfWidth,striped,zOffset=0){
+    function sail(out,center,bottom,top,halfWidth,striped,depth,billow){
       const columns=24,rows=18;
-      function point(u,v){return[center+(u-.5)*halfWidth*2*(.82+.18*v),bottom+v*(top-bottom)-.11*Math.sin(u*Math.PI),zOffset+.15+.66*Math.sin(u*Math.PI)*Math.sin(v*Math.PI)];}
-      function normal(u,v){return normalize(cross([2*halfWidth*(.82+.18*v),-.11*Math.PI*Math.cos(u*Math.PI),.66*Math.PI*Math.cos(u*Math.PI)*Math.sin(v*Math.PI)],[(u-.5)*halfWidth*.36,top-bottom,.66*Math.PI*Math.sin(u*Math.PI)*Math.cos(v*Math.PI)]));}
+      function point(u,v){return[center+(u-.5)*halfWidth*2*(.82+.18*v),bottom+v*(top-bottom)-.11*Math.sin(u*Math.PI),depth+billow*Math.sin(u*Math.PI)*Math.sin(v*Math.PI)];}
+      function normal(u,v){return normalize(cross([2*halfWidth*(.82+.18*v),-.11*Math.PI*Math.cos(u*Math.PI),billow*Math.PI*Math.cos(u*Math.PI)*Math.sin(v*Math.PI)],[(u-.5)*halfWidth*.36,top-bottom,billow*Math.PI*Math.sin(u*Math.PI)*Math.cos(v*Math.PI)]));}
       for(let i=0;i<columns;i+=1)for(let j=0;j<rows;j+=1){
         const u=i/columns,v=j/rows,U=(i+1)/columns,V=(j+1)/rows;
         quad(out,point(u,v),point(U,v),point(U,V),point(u,V),striped&&Math.floor(i/4)%2===0?red:cream,[[u,v],[U,v],[U,V],[u,V]],[normal(u,v),normal(U,v),normal(U,V),normal(u,V)]);
@@ -554,10 +569,12 @@
       for(let i=0;i<=12;i+=1){const p=point(i/12,1);rod([p[0],top+.06,p[2]],p,.012,rope,5);}
       return point;
     }
-    sail(main,-.72,2.05,5.43,2.13,false);
-    sail(rear,1.52,2.95,4.44,1.31,true,-.17);
-    // The small pirate pennant uses the same printed emblem as the main sail.
-    const flagPoint=(u,v)=>[-.72+u*1.05,6.06+v*.46-.055*Math.sin(u*Math.PI),.04+.09*Math.sin(u*5)];
+    // Separate depth envelopes keep both moving cloth surfaces and the standing
+    // rigging clear; the shader's full .055 flutter margin fits between them.
+    sail(main,-.72,2.05,5.43,2.13,false,.94,.38);
+    sail(rear,1.52,2.95,4.44,1.31,true,-.80,.30);
+    // The pennant starts above the lookout rail, with its hoist on the mast.
+    const flagPoint=(u,v)=>[-.72+u*1.05,6.28+v*.44-.055*Math.sin(u*Math.PI),.04+.09*Math.sin(u*5)];
     for(let i=0;i<12;i+=1)for(let j=0;j<4;j+=1){const u=i/12,U=(i+1)/12,v=j/4,V=(j+1)/4;quad(main,flagPoint(u,v),flagPoint(U,v),flagPoint(U,V),flagPoint(u,V),ink,[[u,v],[U,v],[U,V],[u,V]]);}
     canvas.dataset.shipTriangles=String((hull.length+main.length+rear.length+face.length)/33);
     return {hull,main,rear,face};
