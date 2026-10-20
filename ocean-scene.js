@@ -477,8 +477,10 @@
 
     // A round sun-lion with ten swept, pointed rays. Facial linework is
     // printed onto a curved cap, keeping the simple Sunny expression crisp.
-    const faceNormal=normalize([-.80,0,.60]),faceRight=[faceNormal[2],0,-faceNormal[0]];
-    const faceAxes=[faceRight,[0,1,0],faceNormal],head=[-3.08,1.31,.06];
+    // Mount the entire figurehead ahead of the bow, facing mostly along the
+    // keel. Its rear shell and crossbones stay outside the unbroken gunwale.
+    const faceNormal=normalize([-1,0,.25]),faceRight=[faceNormal[2],0,-faceNormal[0]];
+    const faceAxes=[faceRight,[0,1,0],faceNormal],head=[-3.78,1.36,.12];
     const fp=p=>along(head,faceAxes,p);
     const faceSphere=(p,size,color,slices=20,bands=12)=>sphere(fp(p),size,color,slices,bands,faceAxes);
     // Crossbones sit behind the head and emerge diagonally between the rays.
@@ -523,10 +525,13 @@
         [faceUV(r,a),faceUV(R,a),faceUV(R,A),faceUV(r,A)],
         [faceNormalAt(r,a),faceNormalAt(R,a),faceNormalAt(R,A),faceNormalAt(r,A)]);
     }
+    // A short neck joins only the rear shell, rather than using a handrail as
+    // a mount. The surrounding rails never enter the face or mane.
+    rod([-3.08,1.16,0],fp([0,0,-.30]),.15,darkWood,16,.12);
     // The bowsprit runs behind the sculpted head, with its own outboard mount.
-    rod([-2.62,1.10,-.65],[-3.02,1.25,-1.05],.045,wood,10,.035);
-    rod([-2.70,1.14,-1.05],[-4.0,1.62,-1.05],.055,wood,12,.025);
-    path([[-4,1.62,-1.05],[-3.5,.56,-1.0],[-2.65,.4,-.65]],.018,rope);
+    rod([-2.62,1.10,-.65],[-3.02,1.25,-1.35],.045,wood,10,.035);
+    rod([-2.70,1.14,-1.35],[-4.0,1.62,-1.35],.055,wood,12,.025);
+    path([[-4,1.62,-1.35],[-3.5,.56,-1.15],[-2.65,.4,-.65]],.018,rope);
 
     // Tapered masts, brass bindings, yardarms and a proper lookout basket.
     rod([-.72,.98,0],[-.72,6.78,0],.11,wood,16,.048);
@@ -547,7 +552,7 @@
     // Standing rigging and ratlines are behind the billowing cloth.
     // The main backstay lands on the gunwale ahead of the cabin; stern-bound
     // lines would otherwise cut through both storeys and their roof eaves.
-    path([[-4.0,1.62,-1.05],[-.72,6.31,-.12],hullPoint(-1.35,1.15,.975)],.017,rope);
+    path([[-4.0,1.62,-1.35],[-.72,6.31,-.12],hullPoint(-1.35,1.15,.975)],.017,rope);
     [-1,1].forEach(side=>{
       const top=[-.72,5.75,-.10],left=[-1.75,1.10,side*.98],right=[.34,1.10,side*.98];
       [left,right,[-.72,1.10,side*1.04]].forEach(p=>rod(p,top,.013,rope,5));
@@ -773,7 +778,9 @@
     px += (tx - px) * .035; py += (ty - py) * .035; scroll += (scrollTarget - scroll) * .03;
     const filmTime = Math.max(0, t - cinemaStarted);
     const orbit = -.68 + Math.sin(filmTime * .052) * .58 + px * .2;
-    const radius = (mobile ? 20.5 : 14.5) + Math.cos(filmTime * .071) * 2.4;
+    // Fit the full bow ornament into narrow cinema viewports, including at the
+    // closest point of the camera's slow orbit.
+    const radius = (mobile ? Math.max(22,13.2/aspect) : 14.5) + Math.cos(filmTime * .071) * 2.4;
     const eye = cinematic
       ? [Math.sin(orbit) * radius, 5.3 + Math.sin(filmTime * .09 + .3) * 1.1 - py * .65, Math.cos(orbit) * radius]
       : [px * .42 + Math.sin(t * .23) * .13, mobile ? 7.2 : 6.4 + Math.sin(t * .31) * .11, mobile ? 21 : 18];
