@@ -125,7 +125,7 @@ body { text-rendering: optimizeLegibility; }
 .atlas-journal .aj-section-intro { font-size: 16px; line-height: 1.8; color: #526e75; }
 .atlas-journal .scene-promise .aj-section-intro { font-size: 16px; }
 .atlas-journal .aj-research-toolbar { gap: 18px; margin-bottom: 28px; }
-.atlas-journal .scene-promise .aj-research-toolbar { padding-block: 16px 21px; }
+.atlas-journal .scene-promise .aj-research-toolbar { padding-block: 16px 21px; background: none; }
 .atlas-journal .filters { gap: 7px; }
 .atlas-journal .filters button { min-height: 44px; padding: 10px 15px; border-radius: 24px; font-size: 12px; line-height: 1.6; }
 .atlas-journal .filters button:not(.is-active) { background: #12384505; color: #526d75; }
@@ -157,7 +157,7 @@ body { text-rendering: optimizeLegibility; }
 .atlas-journal .paper-actions details p { font-size: 14px; line-height: 1.85; padding-top: 9px; }
 .atlas-journal .aj-scholar-link { min-height: 44px; font-size: 14px; margin-top: 30px; }
 
-.atlas-journal .scene-nakama .aj-journey-grid { border-radius: 22px; border-color: #12384510; background: #f9fbf7f7; box-shadow: 0 12px 35px -30px #12384530; padding: 36px 38px; }
+.atlas-journal .scene-nakama .aj-journey-grid { border-radius: 22px; border-color: transparent; background: none; box-shadow: none; padding: 36px 38px; }
 .atlas-journal .aj-column-title { font-size: 18px; font-weight: 600; letter-spacing: -.02em; }
 .atlas-journal .aj-timeline time { font-size: 11px; }
 .atlas-journal .aj-timeline h4 { font-size: 19px; line-height: 1.4; letter-spacing: -.02em; }
