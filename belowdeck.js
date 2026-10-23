@@ -23,6 +23,10 @@
   toggle.addEventListener("click", () => motion.click());
   document.body.append(rail, toggle);
   const stops = [...rail.querySelectorAll(".deck-stop")];
+  const chapterLinks = [
+    ...stops.map(link => ({ link, activeClass: "is-current" })),
+    ...[...document.querySelectorAll(".nav-links a[href^='#']")].map(link => ({ link, activeClass: "is-active" }))
+  ];
   const entries = [...journal.querySelectorAll(".aj-timeline li,.aj-honors li")];
   entries.forEach((entry, i) => { entry.classList.add("deck-entry"); entry.style.setProperty("--deck-delay", `${i % 3 * 60}ms`); });
   const timelines = [...journal.querySelectorAll(".aj-timeline")];
@@ -33,7 +37,7 @@
   const ports = [...document.querySelectorAll("[data-chart-port]")];
   let routeLength = 0;
   if (course && typeof course.getTotalLength === "function") routeLength = course.getTotalLength();
-  let request = 0, dirty = true, bounds = new Map(), chartProgress = -1, activeId = "", away = false;
+  let request = 0, dirty = true, bounds = new Map(), chartProgress = -1, activeId = null, away = false;
   let observer = null;
 
   function documentTop(element) {
@@ -62,7 +66,7 @@
     if (away !== nextAway) { away = nextAway; root.classList.toggle("deck-away", away); }
     const footerBox = footer && bounds.get(footer);
     root.classList.toggle("deck-at-end", Boolean(footerBox && y + vh > footerBox.top));
-    let current = chapters[0]?.id || "";
+    let current = "";
     chapters.forEach(section => {
       const box = bounds.get(section);
       if (cursor >= box.top) current = section.id;
@@ -77,10 +81,10 @@
     });
     if (current !== activeId) {
       activeId = current;
-      stops.forEach(stop => {
-        const active = stop.hash === `#${current}`;
-        stop.classList.toggle("is-current", active);
-        if (active) stop.setAttribute("aria-current", "location"); else stop.removeAttribute("aria-current");
+      chapterLinks.forEach(({ link, activeClass }) => {
+        const active = link.hash === `#${current}`;
+        link.classList.toggle(activeClass, active);
+        if (active) link.setAttribute("aria-current", "location"); else link.removeAttribute("aria-current");
       });
     }
     const first = bounds.get(chapters[0]), last = bounds.get(chapters[chapters.length - 1]);

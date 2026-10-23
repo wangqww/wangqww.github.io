@@ -5,15 +5,17 @@
   const siteNav = document.getElementById("site-nav");
 
   if (menuToggle && siteNav) {
-    const closeMenu = () => {
-      siteNav.classList.remove("is-open");
-      menuToggle.setAttribute("aria-expanded", "false");
-    };
-
-    menuToggle.addEventListener("click", () => {
-      const isOpen = menuToggle.getAttribute("aria-expanded") !== "true";
+    const header = menuToggle.closest(".site-header");
+    const setMenuOpen = (isOpen) => {
       siteNav.classList.toggle("is-open", isOpen);
       menuToggle.setAttribute("aria-expanded", String(isOpen));
+      menuToggle.setAttribute("aria-label", isOpen ? "Close navigation" : "Open navigation");
+    };
+    const closeMenu = () => setMenuOpen(false);
+    closeMenu();
+
+    menuToggle.addEventListener("click", () => {
+      setMenuOpen(menuToggle.getAttribute("aria-expanded") !== "true");
     });
 
     siteNav.addEventListener("click", (event) => {
@@ -27,6 +29,13 @@
         closeMenu();
         menuToggle.focus();
       }
+    });
+
+    document.addEventListener("pointerdown", (event) => {
+      if (menuToggle.getAttribute("aria-expanded") === "true" && header && !header.contains(event.target)) closeMenu();
+    }, { passive: true });
+    header?.addEventListener("focusout", (event) => {
+      if (!header.contains(event.relatedTarget)) closeMenu();
     });
 
     const desktopQuery = window.matchMedia("(min-width: 801px)");
@@ -106,34 +115,5 @@
       const section = document.getElementById(mission.dataset.mission);
       if (section) portObserver.observe(section);
     });
-  }
-
-  const sectionLinks = [...document.querySelectorAll(".nav-links a[href^='#']")];
-  const sectionEntries = sectionLinks.map((link) => ({
-    link,
-    section: document.getElementById(link.getAttribute("href").slice(1)),
-  })).filter(({ section }) => section);
-
-  if (sectionEntries.length && "IntersectionObserver" in window) {
-    const visibleSections = new Map();
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) visibleSections.set(entry.target.id, entry);
-        else visibleSections.delete(entry.target.id);
-      });
-
-      const current = [...visibleSections.values()]
-        .sort((first, second) => first.boundingClientRect.top - second.boundingClientRect.top)[0];
-      if (!current) return;
-
-      sectionEntries.forEach(({ link, section }) => {
-        const isActive = section.id === current.target.id;
-        link.classList.toggle("is-active", isActive);
-        if (isActive) link.setAttribute("aria-current", "location");
-        else link.removeAttribute("aria-current");
-      });
-    }, { rootMargin: "-96px 0px -45% 0px", threshold: 0 });
-
-    sectionEntries.forEach(({ section }) => observer.observe(section));
   }
 })();

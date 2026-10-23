@@ -1,0 +1,367 @@
+/* A precise, quiet frame for an open sea and a research journal. */
+:root {
+  --header-height: 72px;
+  --polish-ease: cubic-bezier(.22, .61, .36, 1);
+}
+
+html { scroll-padding-top: calc(var(--header-height) + 20px); }
+#about, #research, #logbook, #contact, #news, #edu, #exp, #honors,
+.anchor-alias { scroll-margin-top: 0; }
+body { text-rendering: optimizeLegibility; }
+
+.site-header {
+  background: #faf9f5df;
+  border-bottom-color: #12384510;
+  -webkit-backdrop-filter: blur(20px) saturate(1.15);
+  backdrop-filter: blur(20px) saturate(1.15);
+}
+.nav-shell, .hero-inner {
+  width: min(1160px, calc(100% - 96px));
+  max-width: 1160px;
+}
+.nav-shell { height: var(--header-height); gap: 28px; }
+.brand { min-height: 44px; font-size: 19px; letter-spacing: -.65px; gap: 12px; }
+.brand img { width: 34px; height: 34px; }
+.nav-links { gap: 30px; font-size: 13px; }
+.nav-links a { min-height: 44px; display: inline-flex; align-items: center; }
+.nav-links a.is-active::after { bottom: 1px; }
+.nav-contact { padding: 8px 18px; border-color: #12384522; gap: 18px; }
+.nav-links a, .hero-email, .atlas-journal .aj-contact-email {
+  transition: color .2s var(--polish-ease), background-color .2s var(--polish-ease), border-color .2s var(--polish-ease);
+}
+.reading-progress { height: 1px; }
+.voyage-progress-fill { background: #408a91; }
+
+/* Keep the name and all reading copy still; the ocean supplies the movement. */
+.voyage-hero, .hero-inner { min-height: 748px; }
+.hero-inner { padding-block: 58px 82px; grid-template-columns: 45% 55%; }
+.hero-copy { min-width: 0; padding-block: 6px; transform: none; }
+.hero-eyebrow { font-size: 10px; letter-spacing: 2px; margin-bottom: 27px; }
+.hero-copy h1 {
+  font-size: clamp(48px, 6.15vw, 86px);
+  font-weight: 600;
+  line-height: 1.06;
+  letter-spacing: -.055em;
+}
+.hero-chinese { font-size: 12px; color: #5e767e; margin: 14px 0 27px; letter-spacing: 5px; }
+.hero-tagline { font-size: clamp(30px, 2.9vw, 39px); line-height: 1.24; margin-bottom: 27px; }
+.hero-description { font-size: 15px; line-height: 1.8; max-width: 390px; margin-bottom: 19px; }
+.hero-affiliation { font-size: 12px; line-height: 1.7; }
+.hero-buttons { gap: 26px; margin-top: 29px; }
+.button {
+  min-height: 48px;
+  padding: 12px 22px;
+  font-size: 12px;
+  gap: 23px;
+  transition: background-color .24s var(--polish-ease), box-shadow .24s var(--polish-ease), transform .24s var(--polish-ease);
+}
+.button-primary { box-shadow: 0 8px 24px -15px #12384545; }
+.button-primary:hover { transform: translateY(-1px); box-shadow: 0 10px 26px -15px #12384560; }
+.hero-email { min-height: 44px; font-size: 12px; gap: 12px; }
+.hero-footnote { font-size: 9px; line-height: 1.7; letter-spacing: 1.2px; color: #657f86; margin-top: 35px; }
+.voyage-scene-space { min-height: 540px; }
+.scene-caption { left: 28px; right: 0; bottom: 2px; gap: 18px; }
+.scene-overline { font-size: 9px; line-height: 1.7; letter-spacing: 1.8px; }
+.scene-caption p { font-size: 18px; line-height: 1.45; margin-top: 4px; }
+.scene-caption .ocean-controls { gap: 8px; }
+#cinema-open, .scene-caption #sea-motion-toggle {
+  min-height: 44px;
+  padding: 10px 14px;
+  font-size: 10px;
+  line-height: 1.5;
+}
+#cinema-open { gap: 8px; }
+.cinema-close, .cinema-motion { min-height: 44px; font-size: 11px; }
+.cinema-mark { font-size: 9px; letter-spacing: 2px; }
+.cinema-eyebrow { font-size: 10px; letter-spacing: 2.5px; }
+#cinema-description { font-size: 12px; }
+
+/* Navigation becomes part of the page rather than another set of cards. */
+.port-nav, .site-footer { width: min(1160px, calc(100% - 96px)); }
+.port-nav { padding-block: 24px 30px; margin-top: 20px; }
+.port-heading { gap: 13px; margin-bottom: 21px; flex-wrap: wrap; }
+.port-heading div > span { font-size: 9px; letter-spacing: 1.5px; color: #678187; }
+.port-heading p { font-size: 14px; color: #3f626d; }
+.port-progress { font-size: 11px; color: #6a8085; font-variant-numeric: tabular-nums; }
+.mission { gap: 18px; min-height: 72px; }
+.port-number {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 36px;
+  height: 36px;
+  border: 1px solid #1238451a;
+  border-radius: 50%;
+  font: 500 12px/1 var(--sans);
+  color: #6c8b8f;
+  font-variant-numeric: tabular-nums;
+}
+.mission small { font-size: 9px; letter-spacing: 1.2px; color: #6c858b; }
+.mission strong { font-size: 15px; line-height: 1.5; }
+.chart-caption { font-size: 18px; }
+.chart-caption-note { font-size: 9px; letter-spacing: 1.5px; color: #6c8580; }
+
+/* Readable type, a consistent measure and modest elevation. */
+.atlas-journal .aj-container { width: min(1160px, calc(100% - 96px)); }
+.atlas-journal h2 { font-size: clamp(35px, 3.6vw, 50px); font-weight: 600; line-height: 1.13; letter-spacing: -.04em; }
+.atlas-journal .aj-kicker { font-size: 11px; line-height: 1.7; letter-spacing: 1.6px; }
+.atlas-journal .aj-about { padding-block: 96px 76px; gap: 84px; }
+.atlas-journal .aj-about-copy > p:not(.aj-kicker) { font-size: 16px; line-height: 1.85; }
+.atlas-journal .aj-portrait { transform: none; border-radius: 24px; padding: 8px; background: #f2f4ed; box-shadow: 0 16px 40px -29px #12384555; }
+.atlas-journal .aj-portrait img { border-radius: 17px; }
+.atlas-journal .aj-portrait::before { transform: rotate(1.5deg); border-radius: 24px; background: #edf1e8; }
+.atlas-journal .aj-profile::before { opacity: .32; }
+.atlas-journal .aj-profile-figure figcaption { font-size: 17px; margin-top: 20px; }
+.atlas-journal .aj-profile-location { font-size: 12px; color: #647a80; }
+.atlas-journal .aj-interests { gap: 10px 20px; margin-top: 26px; }
+.atlas-journal .aj-interests li { font-size: 12px; line-height: 1.6; }
+.atlas-journal .aj-social-links { gap: 26px; margin-top: 24px; }
+.atlas-journal .aj-social-links a { font-size: 13px; min-height: 44px; padding-block: 6px; }
+.atlas-journal .aj-news { padding-block: 30px 45px; gap: 84px; }
+.atlas-journal .aj-news h2 { font-size: 26px; letter-spacing: -.03em; }
+.atlas-journal .aj-news-list p { font-size: 14px; line-height: 1.8; }
+.atlas-journal .aj-news-list time { font-size: 11px; }
+.atlas-journal .aj-news-older summary { min-height: 44px; font-size: 13px; }
+.atlas-journal .aj-section-intro { font-size: 16px; line-height: 1.8; color: #526e75; }
+.atlas-journal .scene-promise .aj-section-intro { font-size: 16px; }
+.atlas-journal .aj-research-toolbar { gap: 18px; margin-bottom: 28px; }
+.atlas-journal .scene-promise .aj-research-toolbar { padding-block: 16px 21px; }
+.atlas-journal .filters { gap: 7px; }
+.atlas-journal .filters button { min-height: 44px; padding: 10px 15px; border-radius: 24px; font-size: 12px; line-height: 1.6; }
+.atlas-journal .filters button:not(.is-active) { background: #12384505; color: #526d75; }
+.atlas-journal .filters button:not(.is-active):hover { background: #1238450d; color: var(--ink); }
+.atlas-journal #result-count { font-size: 12px; color: #647a80; }
+.atlas-journal .aj-papers { gap: 28px; }
+.atlas-journal .paper, .atlas-journal .paper.aj-featured {
+  border-radius: 22px;
+  border-color: #12384512;
+  background: #fffefa;
+  box-shadow: 0 10px 36px -28px #12384538;
+  transform-style: flat;
+  transition: opacity .55s var(--polish-ease), transform .55s var(--polish-ease), box-shadow .25s var(--polish-ease), border-color .25s var(--polish-ease);
+}
+.atlas-journal .paper:hover, .atlas-journal .paper:focus-within { border-color: #1238452b; box-shadow: 0 17px 40px -28px #12384555; }
+.atlas-journal .paper::after { display: none; }
+.voyage-enhanced .atlas-journal .paper.is-revealed[data-tilt] { transform: none; }
+.atlas-journal .aj-paper-image { padding: 22px 22px 0; background: #f1f4ef; border-color: #1238450d; }
+.atlas-journal .aj-paper-image > img, .atlas-journal .aj-featured .aj-paper-image > img { border-radius: 9px; object-fit: contain; }
+.atlas-journal .aj-paper-image figcaption { font-size: 11px; line-height: 1.55; min-height: 48px; color: #647d7b; }
+.atlas-journal .aj-paper-number { font-size: 11px; color: #607e76; }
+.atlas-journal .aj-paper-copy, .atlas-journal .aj-featured .aj-paper-copy { padding: 30px 31px 25px; }
+.atlas-journal .paper h3 { font-size: 22px; font-weight: 600; line-height: 1.37; letter-spacing: -.025em; }
+.atlas-journal .aj-featured h3 { font-size: 26px; line-height: 1.3; }
+.atlas-journal .aj-venue { font-size: 11px; line-height: 1.6; letter-spacing: .85px; }
+.atlas-journal .authors, .atlas-journal .aj-featured .authors { font-size: 13px; line-height: 1.8; margin-top: 16px; margin-bottom: 22px; color: #60757b; }
+.atlas-journal .paper-actions { font-size: 13px; gap: 4px 23px; padding-top: 10px; border-color: #1238450d; }
+.atlas-journal .paper-actions > a, .atlas-journal .paper-actions summary { min-height: 44px; align-items: center; }
+.atlas-journal .paper-actions details p { font-size: 14px; line-height: 1.85; padding-top: 9px; }
+.atlas-journal .aj-scholar-link { min-height: 44px; font-size: 14px; margin-top: 30px; }
+
+.atlas-journal .scene-nakama .aj-journey-grid { border-radius: 22px; border-color: #12384510; background: #f9fbf7f7; box-shadow: 0 12px 35px -30px #12384530; padding: 36px 38px; }
+.atlas-journal .aj-column-title { font-size: 18px; font-weight: 600; letter-spacing: -.02em; }
+.atlas-journal .aj-timeline time { font-size: 11px; }
+.atlas-journal .aj-timeline h4 { font-size: 19px; line-height: 1.4; letter-spacing: -.02em; }
+.atlas-journal .aj-timeline p { font-size: 14px; line-height: 1.75; }
+.atlas-journal .aj-timeline li > span { font-size: 12px; color: #647e78; }
+.atlas-journal .aj-honors li { border-radius: 17px; background: #fbfcf9e6; border-color: #1238450e; padding: 23px; }
+.atlas-journal .aj-honors h4 { font-size: 14px; }
+.atlas-journal .aj-honors p { font-size: 13px; line-height: 1.75; }
+.atlas-journal .award-year { font-size: 12px; }
+.atlas-journal .scene-merry { border-radius: 28px; border-color: #1238450e; box-shadow: 0 16px 45px -34px #12384545; }
+.atlas-journal .scene-merry .aj-contact-copy { max-width: 440px; }
+.atlas-journal .scene-merry h2 { font-size: clamp(40px, 4vw, 52px); font-weight: 600; letter-spacing: -.04em; }
+.atlas-journal .scene-merry .aj-contact-copy > p:not(.aj-kicker) { font-size: 15px; line-height: 1.8; max-width: 370px; }
+.atlas-journal .scene-merry .aj-contact-email { font-size: 15px; line-height: 1.9; }
+.site-footer { padding-block: 27px; font-size: 11px; line-height: 1.7; color: #647a80; }
+.site-footer a { min-height: 44px; display: inline-flex; align-items: center; }
+.footer-brand { font-size: 13px; }
+.footer-brand small { font-size: 10px; color: #647a80; }
+.deck-motion-toggle { font-size: 11px; min-height: 44px; box-shadow: 0 7px 24px -16px #12384535; }
+.deck-stop-number { font-size: 10px; }
+.deck-stop-label { font-size: 11px; }
+.deck-rail-title { font-size: 8px; letter-spacing: 1.1px; }
+
+@media (min-width: 801px) and (max-width: 1100px) {
+  .hero-inner { grid-template-columns: 46% 54%; }
+  .hero-copy h1 { font-size: clamp(48px, 5.9vw, 65px); }
+  .hero-tagline { font-size: 31px; }
+  .hero-description { font-size: 14px; max-width: 340px; }
+  .hero-buttons { gap: 19px; }
+  .button { padding-inline: 18px; gap: 16px; }
+  .scene-caption { left: 16px; }
+  /* Reserve the narrow scene margin for controls, clear of the ship. */
+  .scene-caption > div:first-child { display: none; }
+  .atlas-journal .aj-about, .atlas-journal .aj-news { gap: 52px; }
+}
+
+@media (max-width: 900px) {
+  .atlas-journal .aj-papers { grid-template-columns: minmax(0, 1fr); gap: 25px; }
+  .atlas-journal .paper.aj-featured { display: flex; }
+  .atlas-journal .aj-paper-image, .atlas-journal .aj-featured .aj-paper-image {
+    display: block;
+    padding: 24px 24px 0;
+    border-right: 0;
+    border-bottom: 1px solid #1238450d;
+  }
+  .atlas-journal .aj-paper-image > img, .atlas-journal .aj-featured .aj-paper-image > img {
+    height: auto;
+    aspect-ratio: 16/8;
+    max-height: 330px;
+  }
+  .atlas-journal .paper h3, .atlas-journal .aj-featured h3 { font-size: 24px; }
+  .atlas-journal .aj-journey-grid { gap: 30px; }
+}
+
+@media (max-width: 800px) {
+  :root { --header-height: 68px; }
+  .nav-shell, .hero-inner, .port-nav, .site-footer, .atlas-journal .aj-container { width: calc(100% - 48px); }
+  .nav-shell { gap: 16px; }
+  .brand { font-size: 18px; gap: 10px; }
+  .brand img { width: 32px; height: 32px; }
+  .menu-toggle { width: 44px; height: 44px; flex: none; padding: 13px; }
+  .nav-links { top: calc(var(--header-height) - 1px); left: 24px; right: 24px; padding: 12px 20px; gap: 0; font-size: 15px; border-radius: 20px; box-shadow: 0 20px 45px -24px #12384540; }
+  .nav-links a { display: flex; padding-block: 13px; }
+  .nav-links .nav-contact { padding-block: 13px; }
+  .voyage-hero, .hero-inner { min-height: 0; }
+  .hero-inner { grid-template-columns: minmax(0, 1fr); padding-block: 39px 67px; }
+  .hero-copy { padding: 0; max-width: 530px; }
+  .hero-copy h1 { font-size: clamp(48px, 14vw, 76px); }
+  .hero-eyebrow { font-size: 10px; letter-spacing: 1.7px; margin-bottom: 25px; }
+  .hero-chinese { font-size: 12px; margin: 13px 0 24px; }
+  .hero-tagline { font-size: 35px; margin-bottom: 24px; }
+  .hero-description { font-size: 14px; line-height: 1.85; max-width: 440px; margin-bottom: 17px; }
+  .hero-affiliation { font-size: 12px; }
+  .hero-buttons { gap: 22px; margin-top: 26px; }
+  .hero-footnote { font-size: 9px; margin-top: 27px; }
+  .voyage-scene-space { height: 470px; min-height: 470px; margin-top: 19px; }
+  .scene-caption { left: 10px; right: 10px; bottom: 2px; }
+  .scene-caption p { font-size: 18px; }
+  .port-nav { padding-block: 24px 26px; }
+  .mission { gap: 12px; padding-right: 16px; }
+  .mission + .mission { padding-left: 16px; }
+  .mission strong { font-size: 13px; }
+  .mission small { font-size: 8px; letter-spacing: .9px; }
+  .port-number { width: 32px; height: 32px; }
+  .chart-caption-note { font-size: 8px; letter-spacing: 1.1px; }
+  .atlas-journal h2 { font-size: 38px; }
+  .atlas-journal .aj-about { padding-block: 75px 58px; gap: 35px; }
+  .atlas-journal .aj-about-copy > p:not(.aj-kicker) { font-size: 15px; }
+  .atlas-journal .aj-news { gap: 35px; padding-bottom: 38px; }
+  .atlas-journal .scene-promise .aj-section-heading > div { max-width: 335px; }
+  .atlas-journal .scene-promise .aj-section-intro { font-size: 15px; max-width: 300px; }
+  .atlas-journal .aj-paper-copy, .atlas-journal .aj-featured .aj-paper-copy { padding: 29px 29px 23px; }
+  .atlas-journal .scene-nakama .aj-journey-grid { padding: 30px 27px; gap: 30px; }
+  .atlas-journal .aj-honors li { padding: 20px 17px; }
+  .atlas-journal .scene-merry { padding: 43px 31px; }
+  .atlas-journal .scene-merry .aj-contact-copy { max-width: 330px; }
+  .atlas-journal .scene-merry .aj-contact-copy > p:not(.aj-kicker) { font-size: 14px; }
+  .atlas-journal .scene-merry .aj-contact-email { font-size: 13px; }
+  .deck-motion-toggle, html.deck-at-end .deck-motion-toggle { top: 12px; right: 80px; bottom: auto; width: 44px; height: 44px; min-height: 44px; padding: 0; }
+}
+
+@media (max-width: 560px) {
+  .atlas-journal .aj-container { width: calc(100% - 40px); }
+  .hero-tagline { font-size: 32px; }
+  .hero-buttons { gap: 16px; }
+  .hero-buttons .button { font-size: 11px; min-height: 46px; padding-inline: 16px; gap: 14px; }
+  .hero-email { font-size: 12px; gap: 9px; }
+  .hero-footnote { letter-spacing: 1px; }
+  .voyage-scene-space { height: 420px; min-height: 420px; }
+  .scene-caption { left: 0; right: 0; bottom: 0; gap: 13px; }
+  .scene-caption .ocean-controls { width: 100%; gap: 8px; }
+  .scene-overline { font-size: 9px; letter-spacing: 1.5px; }
+  .scene-caption p { font-size: 17px; }
+  #cinema-open, .scene-caption #sea-motion-toggle { min-height: 44px; font-size: 10px; padding: 10px 13px; }
+  .cinema-mark { font-size: 8px; letter-spacing: 1.3px; }
+  .cinema-eyebrow { font-size: 9px; letter-spacing: 2px; }
+  #cinema-description { font-size: 11px; }
+  .cinema-motion { font-size: 11px; min-height: 44px; }
+  .cinema-close { min-width: 44px; min-height: 44px; }
+  .port-heading { gap: 11px; }
+  .port-heading div > span { font-size: 8px; letter-spacing: 1.2px; }
+  .port-heading p { font-size: 13px; }
+  .port-heading img { width: 28px; height: 28px; }
+  .port-progress { font-size: 9px; }
+  .ports { grid-template-columns: 1fr; }
+  .mission, .mission + .mission { min-height: 79px; padding: 15px 0; gap: 18px; border-left: 0; }
+  .mission + .mission { border-top: 1px solid #1238450c; }
+  .mission strong { font-size: 15px; }
+  .mission small { font-size: 9px; letter-spacing: 1.2px; }
+  .port-number { width: 36px; height: 36px; }
+  .chart-caption { font-size: 17px; }
+  .chart-mobile-key { font-size: 9px; color: #58786f; }
+  .atlas-journal .aj-about { padding-block: 62px 46px; gap: 32px; }
+  .atlas-journal .aj-profile { width: 176px; }
+  .atlas-journal .aj-profile-location { font-size: 11px; }
+  .atlas-journal .aj-profile-figure figcaption { font-size: 15px; }
+  .atlas-journal .aj-about-copy h2 { font-size: 36px; }
+  .atlas-journal .aj-about-copy > p:not(.aj-kicker) { font-size: 15px; line-height: 1.85; }
+  .atlas-journal .aj-interests { gap: 9px 17px; }
+  .atlas-journal .aj-interests li { font-size: 12px; }
+  .atlas-journal .aj-social-links { gap: 20px; margin-top: 18px; }
+  .atlas-journal .aj-social-links a { font-size: 13px; gap: 10px; }
+  .atlas-journal .aj-news { padding-block: 25px 33px; }
+  .atlas-journal .aj-news-list p { font-size: 14px; }
+  .atlas-journal .aj-news-list time { font-size: 11px; }
+  .atlas-journal .aj-kicker { font-size: 10px; letter-spacing: 1.3px; }
+  .atlas-journal .scene-promise h2, .atlas-journal .scene-nakama h2 { font-size: 35px; line-height: 1.14; }
+  .atlas-journal .scene-promise .aj-section-intro { font-size: 14px; line-height: 1.8; }
+  .atlas-journal .filters { gap: 6px; }
+  .atlas-journal .filters button { font-size: 11px; min-height: 44px; padding: 10px 12px; }
+  .atlas-journal .aj-papers { gap: 23px; }
+  .atlas-journal .paper, .atlas-journal .paper.aj-featured { border-radius: 20px; }
+  .atlas-journal .aj-paper-image, .atlas-journal .aj-featured .aj-paper-image { padding: 17px 17px 0; }
+  .atlas-journal .aj-paper-image > img, .atlas-journal .aj-featured .aj-paper-image > img { aspect-ratio: 16/10; max-height: 260px; }
+  .atlas-journal .aj-paper-image figcaption { min-height: 45px; font-size: 11px; gap: 14px; }
+  .atlas-journal .aj-paper-copy, .atlas-journal .aj-featured .aj-paper-copy { padding: 25px 23px 18px; }
+  .atlas-journal .paper h3, .atlas-journal .aj-featured h3 { font-size: 21px; line-height: 1.37; }
+  .atlas-journal .aj-venue { font-size: 10px; letter-spacing: .8px; }
+  .atlas-journal .authors, .atlas-journal .aj-featured .authors { font-size: 12px; line-height: 1.85; margin-block: 15px 20px; }
+  .atlas-journal .paper-actions { font-size: 13px; gap: 4px 20px; }
+  .atlas-journal .paper-actions details p { font-size: 14px; }
+  .atlas-journal .aj-scholar-link { font-size: 13px; }
+  .atlas-journal .scene-nakama .aj-journey-grid { padding: 28px 23px; gap: 37px; }
+  .atlas-journal .aj-column-title { font-size: 17px; }
+  .atlas-journal .aj-timeline h4 { font-size: 18px; }
+  .atlas-journal .aj-timeline p { font-size: 14px; }
+  .atlas-journal .aj-timeline li > span { font-size: 12px; }
+  .atlas-journal .aj-honors li { padding: 20px 18px; grid-template-columns: 43px minmax(0, 1fr); gap: 11px; }
+  .atlas-journal .aj-honors h4 { font-size: 14px; }
+  .atlas-journal .aj-honors p { font-size: 13px; }
+  .atlas-journal .scene-merry { padding: 36px 25px 0; border-radius: 23px; min-height: 630px; }
+  .atlas-journal .scene-merry .aj-contact-copy { max-width: none; }
+  .atlas-journal .scene-merry h2 { font-size: 39px; }
+  .atlas-journal .scene-merry .aj-contact-copy > p:not(.aj-kicker) { font-size: 14px; line-height: 1.85; }
+  .atlas-journal .scene-merry .aj-contact-email { font-size: 12px; }
+  .site-footer { padding-block: 20px; gap: 10px; }
+  .site-footer > div { font-size: 11px; gap: 22px; }
+  .footer-brand { font-size: 12px; }
+}
+
+@media (max-width: 360px) {
+  .hero-copy h1 { font-size: 48px; }
+  .hero-tagline { font-size: 30px; }
+  .hero-affiliation { font-size: 11px; }
+  .hero-buttons { gap: 14px; }
+  .hero-buttons .button { font-size: 10px; padding-inline: 15px; }
+  .hero-email { font-size: 11px; }
+  .hero-footnote { font-size: 8px; letter-spacing: .9px; }
+  .scene-caption p { font-size: 16px; }
+  #cinema-open, .scene-caption #sea-motion-toggle { padding-inline: 11px; font-size: 9px; }
+  .atlas-journal .aj-social-links { gap: 17px; }
+  .atlas-journal .aj-social-links a { font-size: 12px; gap: 7px; }
+  .atlas-journal .aj-paper-copy, .atlas-journal .aj-featured .aj-paper-copy { padding-inline: 20px; }
+  .atlas-journal .paper h3, .atlas-journal .aj-featured h3 { font-size: 20px; }
+  .atlas-journal .scene-nakama .aj-journey-grid { padding-inline: 20px; }
+  .atlas-journal .scene-merry { padding-inline: 22px; }
+  .atlas-journal .scene-merry h2 { font-size: 36px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .nav-links a, .button, .hero-email, #cinema-open, #sea-motion-toggle,
+  .cinema-close, .cinema-motion, .atlas-journal .paper,
+  .atlas-journal .filters button, .atlas-journal .aj-contact-email,
+  .voyage-enhanced [data-reveal] { transition: none; }
+  .button-primary:hover { transform: none; }
+}

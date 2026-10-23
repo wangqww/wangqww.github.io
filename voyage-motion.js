@@ -9,19 +9,13 @@
   const rippleLayer = document.getElementById("sea-ripples");
   const hero = document.getElementById("home");
   const reveals = [...document.querySelectorAll("[data-reveal]")];
-  const tiltElements = [...document.querySelectorAll("[data-tilt]")];
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-  const finePointer = window.matchMedia("(hover: hover) and (pointer: fine)");
   const clamp = (value, minimum, maximum) => Math.min(maximum, Math.max(minimum, value));
-  const tiltState = new Map();
   const activeRipples = new Map();
   let storedChoice = null;
   let sailing = false;
   let frame = 0;
   let progressDirty = true;
-  let pointerDirty = false;
-  let pointerX = 0;
-  let pointerY = 0;
   let displayedPercent = -1;
   let revealObserver = null;
 
@@ -54,32 +48,6 @@
       }
       progressDirty = false;
     }
-
-    if (pointerDirty) {
-      root.style.setProperty("--pointer-x", pointerX.toFixed(4));
-      root.style.setProperty("--pointer-y", pointerY.toFixed(4));
-      pointerDirty = false;
-    }
-
-    tiltState.forEach((state, element) => {
-      if (!state.dirty) return;
-      state.dirty = false;
-      if (!state.active || !sailing || !finePointer.matches) {
-        element.style.setProperty("--tilt-x", "0deg");
-        element.style.setProperty("--tilt-y", "0deg");
-        element.style.setProperty("--glow-x", "50%");
-        element.style.setProperty("--glow-y", "50%");
-        return;
-      }
-      const bounds = element.getBoundingClientRect();
-      if (!bounds.width || !bounds.height) return;
-      const x = clamp((state.x - bounds.left) / bounds.width, 0, 1);
-      const y = clamp((state.y - bounds.top) / bounds.height, 0, 1);
-      element.style.setProperty("--tilt-x", `${((0.5 - y) * 6).toFixed(2)}deg`);
-      element.style.setProperty("--tilt-y", `${((x - 0.5) * 6).toFixed(2)}deg`);
-      element.style.setProperty("--glow-x", `${(x * 100).toFixed(1)}%`);
-      element.style.setProperty("--glow-y", `${(y * 100).toFixed(1)}%`);
-    });
   }
 
   const revealAll = () => {
@@ -114,17 +82,6 @@
     activeRipples.clear();
   };
 
-  const resetPointer = () => {
-    pointerX = 0;
-    pointerY = 0;
-    pointerDirty = true;
-    tiltState.forEach((state) => {
-      state.active = false;
-      state.dirty = true;
-    });
-    schedule();
-  };
-
   const setMotion = (enabled, persist = false) => {
     sailing = Boolean(enabled);
     root.dataset.seaMotion = sailing ? "sailing" : "paused";
@@ -141,10 +98,7 @@
         // A disabled storage policy must not disable the motion toggle.
       }
     }
-    if (!sailing) {
-      resetPointer();
-      clearRipples();
-    }
+    if (!sailing) clearRipples();
     observeReveals();
   };
 
@@ -157,36 +111,6 @@
   onMediaChange(reducedMotion, () => {
     setMotion(!reducedMotion.matches && storedChoice !== "paused");
   });
-  onMediaChange(finePointer, () => {
-    if (!finePointer.matches) resetPointer();
-  });
-
-  tiltElements.forEach((element) => {
-    const state = { x: 0, y: 0, active: false, dirty: false };
-    tiltState.set(element, state);
-    element.addEventListener("pointermove", (event) => {
-      if (!sailing || !finePointer.matches || document.hidden) return;
-      state.x = event.clientX;
-      state.y = event.clientY;
-      state.active = true;
-      state.dirty = true;
-      schedule();
-    }, { passive: true });
-    element.addEventListener("pointerleave", () => {
-      state.active = false;
-      state.dirty = true;
-      schedule();
-    }, { passive: true });
-  });
-
-  window.addEventListener("pointermove", (event) => {
-    if (!sailing || !finePointer.matches || document.hidden) return;
-    pointerX = clamp(event.clientX / Math.max(1, window.innerWidth) * 2 - 1, -1, 1);
-    pointerY = clamp(event.clientY / Math.max(1, window.innerHeight) * 2 - 1, -1, 1);
-    pointerDirty = true;
-    schedule();
-  }, { passive: true });
-  root.addEventListener("pointerleave", resetPointer, { passive: true });
 
   const refreshProgress = () => {
     progressDirty = true;
